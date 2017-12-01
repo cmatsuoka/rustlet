@@ -1,0 +1,6 @@
+[package]
+name = "rustlet"
+version = "0.1.0"
+authors = ["Claudio Matsuoka <claudio.matsuoka@cits.br>"]
+
+[dependencies]
