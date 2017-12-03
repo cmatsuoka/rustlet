@@ -7,12 +7,12 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
 
-const SMUSH_EQUAL     : u32 = 1;
-const SMUSH_UNDERSCORE: u32 = 2;
-const SMUSH_HIERARCHY : u32 = 4;
-const SMUSH_PAIR      : u32 = 8;
-const SMUSH_BIGX      : u32 = 16;
-const SMUSH_HARDBLANK : u32 = 32;
+pub const SMUSH_EQUAL    : u32 = 1;
+pub const SMUSH_UNDERLINE: u32 = 2;
+pub const SMUSH_HIERARCHY: u32 = 4;
+pub const SMUSH_PAIR     : u32 = 8;
+pub const SMUSH_BIGX     : u32 = 16;
+pub const SMUSH_HARDBLANK: u32 = 32;
 
 const ERR_INVALID: &'static str = "invalid font file";
 
@@ -20,8 +20,8 @@ const ERR_INVALID: &'static str = "invalid font file";
 #[derive(Debug, Default)]
 pub struct FIGfont {
     version      : char,     // font standard version (currently 'a')
-    hardblank    : char,     // sub-character used to represent hardblanks
-    height       : usize,
+    pub hardblank: char,     // sub-character used to represent hardblanks
+    pub height   : usize,
     baseline     : usize,    // number of lines from the baseline of a FIGcharacter
     max_length   : usize,    // maximum length of any line describing a FIGcharacter
     old_layout   : u32,
