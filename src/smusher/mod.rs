@@ -20,7 +20,7 @@ macro_rules! cmp_return_other {
     }
 }
 
-macro_rules! matches_return_other {
+macro_rules! find_return_latter {
     ( $p1:expr, $p2:expr, $a:expr, $b:expr ) => {
         if $p1.find($a) != None && $p2.find($b) != None {
             return Some($b)
@@ -31,9 +31,17 @@ macro_rules! matches_return_other {
     }
 }
 
+macro_rules! cmp_any_return {
+    ( $c1:expr, $c2:expr, $a:expr, $b:expr, $r:expr ) => {
+        if ($a == $c1 && $b == $c2) || ($a == $c2 && $b == $c1) {
+            return Some($r)
+        }
+    }
+}
+
 macro_rules! cmp_return {
     ( $c1:expr, $c2:expr, $a:expr, $b:expr, $r:expr ) => {
-        if ($a == $c1 && $b == $c2) || ($b == $c1 && $a == $c2) {
+        if $a == $c1 && $b == $c2 {
             return Some($r)
         }
     }
@@ -65,6 +73,10 @@ impl Smusher {
             return None
         }
 
+        // Universal smushing simply overrides the sub-character from the earlier
+        // FIGcharacter with the sub-character from the later FIGcharacter. This
+        // produces an "overlapping" effect with some FIGfonts, wherin the latter
+        // FIGcharacter may appear to be "in front".
         if self.mode == 0 {
             // Ensure overlapping preference to visible characters
             cmp_return_other!(self.hardblank, l, r);
@@ -78,45 +90,62 @@ impl Smusher {
             return Some(r)
         }
 
-        if self.mode & SM_HARDBLANK != 0 {
-            if l == self.hardblank || r == self.hardblank {
+        // Rule 6: HARDBLANK SMUSHING (code value 32)
+        // Smushes two hardblanks together, replacing them with a single hardblank.
+        if l == self.hardblank || r == self.hardblank {
+            if self.mode & SM_HARDBLANK != 0 {
                 return Some(l)
+            } else {
+                return None
             }
         }
 
-        if l == self.hardblank || r == self.hardblank {
-            return None
-        }
-
+        // Rule 1: EQUAL CHARACTER SMUSHING (code value 1)
+        // Two sub-characters are smushed into a single sub-character if they are the
+        // same (except hardblanks). 
         if self.mode & SM_EQUAL != 0 {
             if l == r {
                 return Some(l)
             }
         }
 
+        // Rule 2: UNDERSCORE SMUSHING (code value 2)
+        // An underscore ("_") will be replaced by any of: "|", "/", "\", "[", "]",
+        // "{", "}", "(", ")", "<" or ">".
         if self.mode & SM_LOWLINE != 0 {
-            matches_return_other!("_", r"|/\[]{}()<>", l, r);
+            find_return_latter!("_", r"|/\[]{}()<>", l, r);
         }
 
+        // Rule 3: HIERARCHY SMUSHING (code value 4)
+        // A hierarchy of six classes is used: "|", "/\", "[]", "{}", "()", and "<>".
+        // When two smushing sub-characters are from different classes, the one from
+        // the latter class will be used.
         if self.mode & SM_HIERARCHY != 0 {
-            matches_return_other!("|", r"|/\[]{}()<>", l, r);
-            matches_return_other!(r"/\", r"|/\[]{}()<>", l, l);
-            matches_return_other!("[]", "{}()<>", l, r);
-            matches_return_other!("{}", "()<>", l, r);
-            matches_return_other!("()", "<>", l, r);
+            find_return_latter!("|", r"|/\[]{}()<>", l, r);
+            find_return_latter!(r"/\", r"|/\[]{}()<>", l, r);
+            find_return_latter!("[]", "{}()<>", l, r);
+            find_return_latter!("{}", "()<>", l, r);
+            find_return_latter!("()", "<>", l, r);
         }
 
+        // Rule 4: OPPOSITE PAIR SMUSHING (code value 8)
+        // Smushes opposing brackets ("[]" or "]["), braces ("{}" or "}{") and parentheses
+        // ("()" or ")(") together, replacing any such pair with a vertical bar ("|").
         if self.mode & SM_PAIR != 0 {
-            cmp_return!('[', ']', l, r, '|');
-            cmp_return!('{', '}', l, r, '|');
-            cmp_return!('(', '}', l, r, '|');
+            cmp_any_return!('[', ']', l, r, '|');
+            cmp_any_return!('[', ']', l, r, '|');
+            cmp_any_return!('{', '}', l, r, '|');
+            cmp_any_return!('(', '}', l, r, '|');
         }
 
+        // Rule 5: BIG X SMUSHING (code value 16)
+        // Smushes "/\" into "|", "\/" into "Y", and "><" into "X". Note that "<>" is not
+        // smushed in any way by this rule. The name "BIG X" is historical; originally all
+        // three pairs were smushed into "X".
         if self.mode & SM_BIGX != 0 {
-            cmp_return!('/', '\\', l, r, 'X');
-            if l == '>' && r == '<' {
-                return Some('X');
-            }
+            cmp_return!('/', '\\', l, r, '|');
+            cmp_return!('\\', '/', l, r, 'Y');
+            cmp_return!('>', '<', l, r, 'X');
         }
 
         return None
