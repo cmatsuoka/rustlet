@@ -8,6 +8,7 @@ const SM_HARDBLANK :u32 = 32;
 const SM_KERN      :u32 = 64;
 const SM_SMUSH     :u32 = 128;
 
+pub mod figfont;
 
 macro_rules! cmp_return_other {
     ( $a:expr, $b:expr, $c:expr ) => {
