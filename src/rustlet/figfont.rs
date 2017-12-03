@@ -104,7 +104,7 @@ impl FIGfont {
 
 #[derive(Debug, Default)]
 pub struct FIGchar {
-    lines: Vec<String>,
+    pub lines: Vec<String>,
 }
 
 impl FIGchar {

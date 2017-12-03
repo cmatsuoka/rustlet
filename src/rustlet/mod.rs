@@ -63,8 +63,23 @@ impl Smusher {
         sm
     }
 
-    fn add_char(self, ch: &char) {
+    pub fn print(self) {
+        for p in self.output {
+            println!("{}", p);
+        }
+    }
+
+    pub fn add_str(&mut self, s: &str) {
+        for c in s.chars() {
+            self.add_char(&c);
+        }
+    }
+
+    pub fn add_char(&mut self, ch: &char) {
          let fc = self.font.get(ch);
+         for i in 0..self.font.height {
+             self.output[i] += &fc.lines[i];
+         }
     }
 
     fn smush(self, l: char, r: char) -> Option<char> {

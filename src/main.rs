@@ -10,16 +10,15 @@ fn main() {
         Err(e) => { println!("Error: {}", e) }
         Ok(_)  => {},
     }
-
-    println!("Hello, world!");
 }
 
 fn process() -> Result<(), Box<Error>> {
     let mut font = FIGfont::new();
     try!(font.load(PathBuf::from("/usr/share/figlet/small.flf")));
-    println!("{}", font.get(&'A'));
-    println!("{}", font.get(&'B'));
-    println!("{}", font.get(&'C'));
+
+    let mut sm = rustlet::Smusher::new(font);
+    sm.add_str(&"Hello world!");
+    sm.print();
 
     Ok(())
 }
