@@ -19,17 +19,17 @@ const ERR_INVALID: &'static str = "invalid font file";
 
 #[derive(Debug, Default)]
 pub struct FIGfont {
-    version      : char,     // font standard version (currently 'a')
-    pub hardblank: char,     // sub-character used to represent hardblanks
-    pub height   : usize,
-    baseline     : usize,    // number of lines from the baseline of a FIGcharacter
-    max_length   : usize,    // maximum length of any line describing a FIGcharacter
-    old_layout   : u32,
-    comment_lines: usize,    // number of comment lines at the start of the file
-    right_to_left: bool,
-    layout       : u32,
-    count        : u32,      // number of code-tagged FIGcharacters in this FIGfont
-    chars        : HashMap<char, FIGchar>, // actual FIGcharacter definitions for this font
+    version       : char,     // font standard version (currently 'a')
+    pub hardblank : char,     // sub-character used to represent hardblanks
+    pub height    : usize,
+    baseline      : usize,    // number of lines from the baseline of a FIGcharacter
+    max_length    : usize,    // maximum length of any line describing a FIGcharacter
+    pub old_layout: u32,
+    comment_lines : usize,    // number of comment lines at the start of the file
+    right_to_left : bool,
+    pub layout    : u32,
+    count         : u32,      // number of code-tagged FIGcharacters in this FIGfont
+    chars         : HashMap<char, FIGchar>, // actual FIGcharacter definitions for this font
 }
 
 impl FIGfont {

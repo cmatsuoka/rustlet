@@ -16,7 +16,7 @@ fn process() -> Result<(), Box<Error>> {
     let mut font = FIGfont::new();
     try!(font.load(PathBuf::from("/usr/share/figlet/small.flf")));
 
-    let mut sm = rustlet::Smusher::new(font);
+    let mut sm = rustlet::Smusher::new(&font);
     sm.add_str(&"Hello world!");
     sm.print();
 

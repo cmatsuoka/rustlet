@@ -40,23 +40,28 @@ macro_rules! cmp_return {
     }
 }
 
-#[derive(Default)]
-pub struct Smusher {
+#[derive(Debug)]
+pub struct Smusher<'a> {
     prev_width: isize,
     curr_width: isize,
     mode      : u32,
     right2left: bool,
-    font      : FIGfont,
+    font      : &'a FIGfont,
     output    : Vec<String>,
 }
 
 
-impl Smusher {
+impl<'a> Smusher<'a> {
 
-    pub fn new(font: FIGfont) -> Self {
-        let mut sm: Smusher = Default::default();
-        sm.font = font;
-        sm.output = Vec::new();
+    pub fn new(font: &'a FIGfont) -> Self {
+        let mut sm = Smusher{
+            font,
+            prev_width: 0,
+            curr_width: 0,
+            mode      : font.layout,
+            right2left: false,
+            output    : Vec::new(),
+        };
         for _ in 0..sm.font.height {
             sm.output.push("".to_string());
         }
