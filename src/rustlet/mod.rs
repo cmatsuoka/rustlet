@@ -1,3 +1,4 @@
+use std::cmp::min;
 use self::figfont::FIGfont;
 
 pub mod figfont;
@@ -147,6 +148,30 @@ impl<'a> Smusher<'a> {
 
         None
     }
+
+}
+
+trait Smush {
+    fn smush_amount(self, &str) -> usize;
+}
+
+impl<'a> Smush for &'a str {
+
+    // Compute the number of characters a string can be smushed into another string.
+    fn smush_amount(self, s: &str) -> usize {
+    
+        let a1 = self.len() - match self.rfind(|x| { let y:char = x; !y.is_whitespace() }) {
+            Some(val) => val + 1,
+            None      => 0,
+        };
+    
+        let a2 = match s.find(|x| { let y:char = x; !y.is_whitespace() }) {
+            Some(val) => val,
+            None      => s.len(),
+        };
+    
+        min(self.len(), a1 + a2 + 1)
+    }
 }
 
 // Rule 1: EQUAL CHARACTER SMUSHING (code value 1)
@@ -295,5 +320,38 @@ mod tests {
         assert_eq!(smush_rule_5('\\', '/', figfont::SMUSH_BIGX), Some('Y'));
         assert_eq!(smush_rule_5('>', '<', figfont::SMUSH_BIGX), Some('X'));
         assert_eq!(smush_rule_5('<', '>', figfont::SMUSH_BIGX), None);
+    }
+
+    #[test]
+    fn test_smush_amount_str() {
+        assert_eq!("    ".smush_amount("    "), 4);
+        assert_eq!("x   ".smush_amount("    "), 4);
+        assert_eq!("xx  ".smush_amount("    "), 4);
+        assert_eq!("xxx ".smush_amount("    "), 4);
+        assert_eq!("xxxx".smush_amount("    "), 4);
+
+        assert_eq!("    ".smush_amount("   x"), 4);
+        assert_eq!("x   ".smush_amount("   x"), 4);
+        assert_eq!("xx  ".smush_amount("   x"), 4);
+        assert_eq!("xxx ".smush_amount("   x"), 4);
+        assert_eq!("xxxx".smush_amount("   x"), 4);
+
+        assert_eq!("    ".smush_amount("  xx"), 4);
+        assert_eq!("x   ".smush_amount("  xx"), 4);
+        assert_eq!("xx  ".smush_amount("  xx"), 4);
+        assert_eq!("xxx ".smush_amount("  xx"), 4);
+        assert_eq!("xxxx".smush_amount("  xx"), 3);
+
+        assert_eq!("    ".smush_amount(" xxx"), 4);
+        assert_eq!("x   ".smush_amount(" xxx"), 4);
+        assert_eq!("xx  ".smush_amount(" xxx"), 4);
+        assert_eq!("xxx ".smush_amount(" xxx"), 3);
+        assert_eq!("xxxx".smush_amount(" xxx"), 2);
+
+        assert_eq!("    ".smush_amount("xxxx"), 4);
+        assert_eq!("x   ".smush_amount("xxxx"), 4);
+        assert_eq!("xx  ".smush_amount("xxxx"), 3);
+        assert_eq!("xxx ".smush_amount("xxxx"), 2);
+        assert_eq!("xxxx".smush_amount("xxxx"), 1);
     }
 }
