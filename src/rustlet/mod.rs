@@ -83,7 +83,8 @@ impl<'a> Smusher<'a> {
     pub fn add_char(&mut self, ch: &char) {
          let fc = self.font.get(ch);
          for i in 0..self.font.height {
-             self.output[i] += &fc.lines[i];
+             let s = str::replace(&fc.lines[i], self.font.hardblank, " ");
+             self.output[i] += &s;
          }
     }
 
