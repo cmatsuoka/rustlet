@@ -1,4 +1,4 @@
-use rustlet::figfont::FIGfont;
+use self::figfont::FIGfont;
 
 pub mod figfont;
 

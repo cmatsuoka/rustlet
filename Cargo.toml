@@ -3,4 +3,12 @@ name = "rustlet"
 version = "0.1.0"
 authors = ["Claudio Matsuoka <claudio.matsuoka@cits.br>"]
 
+[lib]
+name = "rustlet"
+path = "src/rustlet/mod.rs"
+
+[[bin]]
+name = "rustlet"
+path = "src/main.rs"
+
 [dependencies]

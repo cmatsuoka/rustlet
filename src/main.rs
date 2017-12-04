@@ -1,8 +1,9 @@
+extern crate rustlet;
+
 use std::error::Error;
 use std::path::PathBuf;
 use rustlet::figfont::FIGfont;
 
-mod rustlet;
 
 fn main() {
 
