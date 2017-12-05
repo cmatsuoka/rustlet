@@ -102,16 +102,16 @@ impl FIGfont {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct FIGchar {
     pub lines: Vec<String>,
 }
 
 impl FIGchar {
     fn new() -> Self {
-        let mut c: FIGchar = Default::default();
-        c.lines = Vec::new();
-        c
+        FIGchar{
+            lines: Vec::new(),
+        }
     }
 
     fn load<R: BufRead>(&mut self, f: &mut R, height: usize) -> Result<&Self, Box<Error>> {

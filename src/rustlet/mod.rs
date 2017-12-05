@@ -1,5 +1,5 @@
 use std::cmp::min;
-use self::figfont::FIGfont;
+use self::figfont::{FIGchar, FIGfont};
 
 pub mod figfont;
 
@@ -50,6 +50,7 @@ macro_rules! apply_rule {
     }
 }
 
+
 #[derive(Debug)]
 pub struct Smusher<'a> {
     prev_width: isize,
@@ -76,6 +77,10 @@ impl<'a> Smusher<'a> {
             sm.output.push("".to_string());
         }
         sm
+    }
+
+    pub fn amount(self, c: FIGchar) -> usize {
+        smusher_amount(self.output, c, self.font.hardblank, self.mode)
     }
 
     pub fn print(self) {
@@ -108,11 +113,19 @@ impl<'a> Smusher<'a> {
             return None
         }
 
-        do_smush(l, r, self.font.hardblank, self.right2left, self.mode)
+        smusher_smush(l, r, self.font.hardblank, self.right2left, self.mode)
     }
 }
 
-fn do_smush(l: char, r: char, hardblank: char, right2left: bool, mode: u32) -> Option<char> {
+fn smusher_amount(output: Vec<String>, c: FIGchar, hardblank: char, mode: u32) -> usize {
+    let mut amt = 9999;
+    for i in 0..output.len() {
+        amt = min(amt, output[i].smush_amount(&c.lines[i], hardblank, mode));
+    }
+    amt
+}
+
+fn smusher_smush(l: char, r: char, hardblank: char, right2left: bool, mode: u32) -> Option<char> {
 
     // Universal smushing simply overrides the sub-character from the earlier
     // FIGcharacter with the sub-character from the later FIGcharacter. This
@@ -177,7 +190,7 @@ impl<'a> Smush for &'a str {
             Some(tuple) => tuple,
             None        => { return amt; }
         };
-        match do_smush(l, r, hardblank, false, mode) {
+        match smusher_smush(l, r, hardblank, false, mode) {
             Some(_) => { amt + 1 },
             None    => { amt },
         }
@@ -277,6 +290,10 @@ fn smush_rule_5(l: char, r: char, mode: u32) -> Option<char> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    macro_rules! vec_of_strings {
+        ( $($x:expr),* ) => (vec![$($x.to_string()),*])
+    }
 
     #[test]
     fn test_rule_1() {
@@ -416,5 +433,24 @@ mod tests {
         assert_eq!("[".smush_amount("]", '$', 0xbf), 1);     // rule 4
         assert_eq!(">".smush_amount("<", '$', 0xbf), 1);     // rule 5
         assert_eq!("[ ".smush_amount(" {", '$', 0xbf), 3);   // rule 3 + spacing
+    }
+
+    #[test]
+    fn test_smusher_amount() {
+        let output = vec_of_strings![ "", "", "", "" ];
+        let fc = FIGchar{ lines: vec_of_strings![ "   ", "  x", " xx", "xx " ] };
+        assert_eq!(smusher_amount(output, fc, '$', 0xbf), 0);
+
+        let output = vec_of_strings![ "", "", "", "" ];
+        let fc = FIGchar{ lines: vec_of_strings![ "   ", "  x", " xx", "   " ] };
+        assert_eq!(smusher_amount(output, fc, '$', 0xbf), 1);
+
+        let output = vec_of_strings![ "xxx ", "xx  ", "x   ", "    " ];
+        let fc = FIGchar{ lines: vec_of_strings![ "   y", "  yy", " yyy", "yyyy" ] };
+        assert_eq!(smusher_amount(output, fc, '$', 0xbf), 4);
+
+        let output = vec_of_strings![  "xxxx ", "xxx  ", "xx   ", "x    " ];
+        let fc = FIGchar{ lines: vec_of_strings![ "   x", "  xx", " xxx", "xxxx" ] };
+        assert_eq!(smusher_amount(output, fc, '$', 0xbf), 5);
     }
 }
