@@ -108,57 +108,57 @@ impl<'a> Smusher<'a> {
             return None
         }
 
-        Self::do_smush(l, r, self.font.hardblank, self.right2left, self.mode)
+        do_smush(l, r, self.font.hardblank, self.right2left, self.mode)
     }
-
-    fn do_smush(l: char, r: char, hardblank: char, right2left: bool, mode: u32) -> Option<char> {
-
-        // Universal smushing simply overrides the sub-character from the earlier
-        // FIGcharacter with the sub-character from the later FIGcharacter. This
-        // produces an "overlapping" effect with some FIGfonts, wherin the latter
-        // FIGcharacter may appear to be "in front".
-        if mode == 0 {
-            // Ensure overlapping preference to visible characters
-            cmp_return_other!(hardblank, l, r);
-
-            // Ensures that the dominant (foreground) fig-character for overlapping is
-            // the latter in the user's text, not necessarily the rightmost character
-            if right2left {
-                return Some(l)
-            }
-
-            return Some(r)
-        }
-
-        // Rule 6: HARDBLANK SMUSHING (code value 32)
-        // Smushes two hardblanks together, replacing them with a single hardblank.
-        if l == hardblank && r == hardblank {
-            if mode & figfont::SMUSH_HARDBLANK != 0 {
-                return Some(l);
-            } else {
-                return None;
-            }
-        }
-
-        apply_rule!(smush_rule_1(l, r, mode));
-        apply_rule!(smush_rule_2(l, r, mode));
-        apply_rule!(smush_rule_3(l, r, mode));
-        apply_rule!(smush_rule_4(l, r, mode));
-        apply_rule!(smush_rule_5(l, r, mode));
-
-        None
-    }
-
 }
 
+fn do_smush(l: char, r: char, hardblank: char, right2left: bool, mode: u32) -> Option<char> {
+
+    // Universal smushing simply overrides the sub-character from the earlier
+    // FIGcharacter with the sub-character from the later FIGcharacter. This
+    // produces an "overlapping" effect with some FIGfonts, wherin the latter
+    // FIGcharacter may appear to be "in front".
+    if mode == 0 {
+        // Ensure overlapping preference to visible characters
+        cmp_return_other!(hardblank, l, r);
+
+        // Ensures that the dominant (foreground) fig-character for overlapping is
+        // the latter in the user's text, not necessarily the rightmost character
+        if right2left {
+            return Some(l)
+        }
+
+        return Some(r)
+    }
+
+    // Rule 6: HARDBLANK SMUSHING (code value 32)
+    // Smushes two hardblanks together, replacing them with a single hardblank.
+    if l == hardblank && r == hardblank {
+        if mode & figfont::SMUSH_HARDBLANK != 0 {
+            return Some(l);
+        } else {
+            return None;
+        }
+    }
+
+    apply_rule!(smush_rule_1(l, r, mode));
+    apply_rule!(smush_rule_2(l, r, mode));
+    apply_rule!(smush_rule_3(l, r, mode));
+    apply_rule!(smush_rule_4(l, r, mode));
+    apply_rule!(smush_rule_5(l, r, mode));
+
+    None
+}
+
+
 trait Smush {
-    fn smush_amount(self, &str) -> usize;
+    fn smush_amount(self, &str, char, u32) -> usize;
 }
 
 impl<'a> Smush for &'a str {
 
     // Compute the number of characters a string can be smushed into another string.
-    fn smush_amount(self, s: &str) -> usize {
+    fn smush_amount(self, s: &str, hardblank: char, mode: u32) -> usize {
     
         let a1 = self.len() - match self.rfind(|x| { let y:char = x; !y.is_whitespace() }) {
             Some(val) => val + 1,
@@ -170,7 +170,17 @@ impl<'a> Smush for &'a str {
             None      => s.len(),
         };
 
-        a1 + a2 + 1
+        let amt = a1 + a2;
+
+        // Retrieve character pair and see if they're smushable
+        let (l, r) = match smush_chars(self, s, amt + 1) {
+            Some(tuple) => tuple,
+            None        => { return amt; }
+        };
+        match do_smush(l, r, hardblank, false, mode) {
+            Some(_) => { amt + 1 },
+            None    => { amt },
+        }
     }
 }
 
@@ -280,10 +290,14 @@ mod tests {
     fn test_rule_2() {
         for x in [ '|', '/', '\\', '[', ']', '{', '}', '(', ')', '<', '>' ].iter() {
             assert_eq!(smush_rule_2('_', *x, 0), None);
+            assert_eq!(smush_rule_2(*x, '_', 0), None);
             assert_eq!(smush_rule_2('_', *x, figfont::SMUSH_UNDERLINE), Some(*x));
+            assert_eq!(smush_rule_2(*x, '_', figfont::SMUSH_UNDERLINE), Some(*x));
         }
         assert_eq!(smush_rule_2('_', 'x', 0), None);
+        assert_eq!(smush_rule_2('x', '_', 0), None);
         assert_eq!(smush_rule_2('_', 'x', figfont::SMUSH_UNDERLINE), None);
+        assert_eq!(smush_rule_2('x', '_', figfont::SMUSH_UNDERLINE), None);
     }
 
     #[test]
@@ -358,39 +372,49 @@ mod tests {
 
     #[test]
     fn test_smush_amount_str() {
-        assert_eq!("".smush_amount(""), 1);
+        assert_eq!("".smush_amount("", '$', 0xbf), 0);
 
-        assert_eq!("".smush_amount("    "), 5);
-        assert_eq!("".smush_amount("   x"), 4);
+        assert_eq!("".smush_amount("    ", '$', 0xbf), 4);
+        assert_eq!("".smush_amount("   y", '$', 0xbf), 3);
 
-        assert_eq!("    ".smush_amount("    "), 9);
-        assert_eq!("x   ".smush_amount("    "), 8);
-        assert_eq!("xx  ".smush_amount("    "), 7);
-        assert_eq!("xxx ".smush_amount("    "), 6);
-        assert_eq!("xxxx".smush_amount("    "), 5);
+        assert_eq!("    ".smush_amount("    ", '$', 0xbf), 8);
+        assert_eq!("x   ".smush_amount("    ", '$', 0xbf), 7);
+        assert_eq!("xx  ".smush_amount("    ", '$', 0xbf), 6);
+        assert_eq!("xxx ".smush_amount("    ", '$', 0xbf), 5);
+        assert_eq!("xxxx".smush_amount("    ", '$', 0xbf), 4);
 
-        assert_eq!("    ".smush_amount("   x"), 8);
-        assert_eq!("x   ".smush_amount("   x"), 7);
-        assert_eq!("xx  ".smush_amount("   x"), 6);
-        assert_eq!("xxx ".smush_amount("   x"), 5);
-        assert_eq!("xxxx".smush_amount("   x"), 4);
+        assert_eq!("    ".smush_amount("   y", '$', 0xbf), 7);
+        assert_eq!("x   ".smush_amount("   y", '$', 0xbf), 6);
+        assert_eq!("xx  ".smush_amount("   y", '$', 0xbf), 5);
+        assert_eq!("xxx ".smush_amount("   y", '$', 0xbf), 4);
+        assert_eq!("xxxx".smush_amount("   y", '$', 0xbf), 3);
 
-        assert_eq!("    ".smush_amount("  xx"), 7);
-        assert_eq!("x   ".smush_amount("  xx"), 6);
-        assert_eq!("xx  ".smush_amount("  xx"), 5);
-        assert_eq!("xxx ".smush_amount("  xx"), 4);
-        assert_eq!("xxxx".smush_amount("  xx"), 3);
+        assert_eq!("    ".smush_amount("  yy", '$', 0xbf), 6);
+        assert_eq!("x   ".smush_amount("  yy", '$', 0xbf), 5);
+        assert_eq!("xx  ".smush_amount("  yy", '$', 0xbf), 4);
+        assert_eq!("xxx ".smush_amount("  yy", '$', 0xbf), 3);
+        assert_eq!("xxxx".smush_amount("  yy", '$', 0xbf), 2);
 
-        assert_eq!("    ".smush_amount(" xxx"), 6);
-        assert_eq!("x   ".smush_amount(" xxx"), 5);
-        assert_eq!("xx  ".smush_amount(" xxx"), 4);
-        assert_eq!("xxx ".smush_amount(" xxx"), 3);
-        assert_eq!("xxxx".smush_amount(" xxx"), 2);
+        assert_eq!("    ".smush_amount(" yyy", '$', 0xbf), 5);
+        assert_eq!("x   ".smush_amount(" yyy", '$', 0xbf), 4);
+        assert_eq!("xx  ".smush_amount(" yyy", '$', 0xbf), 3);
+        assert_eq!("xxx ".smush_amount(" yyy", '$', 0xbf), 2);
+        assert_eq!("xxxx".smush_amount(" yyy", '$', 0xbf), 1);
 
-        assert_eq!("    ".smush_amount("xxxx"), 5);
-        assert_eq!("x   ".smush_amount("xxxx"), 4);
-        assert_eq!("xx  ".smush_amount("xxxx"), 3);
-        assert_eq!("xxx ".smush_amount("xxxx"), 2);
-        assert_eq!("xxxx".smush_amount("xxxx"), 1);
+        assert_eq!("    ".smush_amount("yyyy", '$', 0xbf), 4);
+        assert_eq!("x   ".smush_amount("yyyy", '$', 0xbf), 3);
+        assert_eq!("xx  ".smush_amount("yyyy", '$', 0xbf), 2);
+        assert_eq!("xxx ".smush_amount("yyyy", '$', 0xbf), 1);
+        assert_eq!("xxxx".smush_amount("yyyy", '$', 0xbf), 0);
+
+        assert_eq!("x".smush_amount("y", '$', 0xbf), 0);
+        assert_eq!("x".smush_amount("x", '$', 0xbf), 1);     // rule 1
+        assert_eq!("<".smush_amount(">", '$', 0xbf), 0);
+        assert_eq!("_".smush_amount("/", '$', 0xbf), 1);     // rule 2
+        assert_eq!("/".smush_amount("_", '$', 0xbf), 1);     // rule 2
+        assert_eq!("[".smush_amount("{", '$', 0xbf), 1);     // rule 3
+        assert_eq!("[".smush_amount("]", '$', 0xbf), 1);     // rule 4
+        assert_eq!(">".smush_amount("<", '$', 0xbf), 1);     // rule 5
+        assert_eq!("[ ".smush_amount(" {", '$', 0xbf), 3);   // rule 3 + spacing
     }
 }
