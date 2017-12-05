@@ -174,6 +174,27 @@ impl<'a> Smush for &'a str {
     }
 }
 
+fn smush_chars(s1: &str, s2: &str, amt: usize) -> Option<(char, char)> {
+    if s1.len() == 0 || s2.len() == 0 {
+        return None;
+    }
+
+    let overlap = min(amt, s2.len());
+
+    for i in (0..overlap).rev() {
+        if s1.len() + i < amt {
+            return None;
+        }
+        let l = s1.chars().nth(s1.len() + i - amt).unwrap();
+        let r = s2.chars().nth(i).unwrap();
+        if l != ' ' && r != ' ' {
+            return Some((l, r));
+        }
+    }
+
+    None
+}
+
 // Rule 1: EQUAL CHARACTER SMUSHING (code value 1)
 // Two sub-characters are smushed into a single sub-character if they are the same (except
 // hardblanks). 
@@ -320,6 +341,19 @@ mod tests {
         assert_eq!(smush_rule_5('\\', '/', figfont::SMUSH_BIGX), Some('Y'));
         assert_eq!(smush_rule_5('>', '<', figfont::SMUSH_BIGX), Some('X'));
         assert_eq!(smush_rule_5('<', '>', figfont::SMUSH_BIGX), None);
+    }
+
+    #[test]
+    fn test_smush_chars() {
+        assert_eq!(smush_chars("    ", "    ", 2), None);
+        assert_eq!(smush_chars("abc ", " xyz", 1), None);
+        assert_eq!(smush_chars("abc ", " xyz", 2), None);
+        assert_eq!(smush_chars("abc ", " xyz", 3), Some(('c', 'x')));
+        assert_eq!(smush_chars("abc   ", " x", 5), Some(('c', 'x')));
+        assert_eq!(smush_chars("a ", " xyzwt", 3), Some(('a', 'x')));
+        assert_eq!(smush_chars("a", "      x", 6), None);
+        assert_eq!(smush_chars("a", "      x", 7), Some(('a', 'x')));
+        assert_eq!(smush_chars("", "       x", 7), None);
     }
 
     #[test]
