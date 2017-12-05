@@ -169,8 +169,8 @@ impl<'a> Smush for &'a str {
             Some(val) => val,
             None      => s.len(),
         };
-    
-        min(self.len(), a1 + a2 + 1)
+
+        a1 + a2 + 1
     }
 }
 
@@ -358,31 +358,36 @@ mod tests {
 
     #[test]
     fn test_smush_amount_str() {
-        assert_eq!("    ".smush_amount("    "), 4);
-        assert_eq!("x   ".smush_amount("    "), 4);
-        assert_eq!("xx  ".smush_amount("    "), 4);
-        assert_eq!("xxx ".smush_amount("    "), 4);
-        assert_eq!("xxxx".smush_amount("    "), 4);
+        assert_eq!("".smush_amount(""), 1);
 
-        assert_eq!("    ".smush_amount("   x"), 4);
-        assert_eq!("x   ".smush_amount("   x"), 4);
-        assert_eq!("xx  ".smush_amount("   x"), 4);
-        assert_eq!("xxx ".smush_amount("   x"), 4);
+        assert_eq!("".smush_amount("    "), 5);
+        assert_eq!("".smush_amount("   x"), 4);
+
+        assert_eq!("    ".smush_amount("    "), 9);
+        assert_eq!("x   ".smush_amount("    "), 8);
+        assert_eq!("xx  ".smush_amount("    "), 7);
+        assert_eq!("xxx ".smush_amount("    "), 6);
+        assert_eq!("xxxx".smush_amount("    "), 5);
+
+        assert_eq!("    ".smush_amount("   x"), 8);
+        assert_eq!("x   ".smush_amount("   x"), 7);
+        assert_eq!("xx  ".smush_amount("   x"), 6);
+        assert_eq!("xxx ".smush_amount("   x"), 5);
         assert_eq!("xxxx".smush_amount("   x"), 4);
 
-        assert_eq!("    ".smush_amount("  xx"), 4);
-        assert_eq!("x   ".smush_amount("  xx"), 4);
-        assert_eq!("xx  ".smush_amount("  xx"), 4);
+        assert_eq!("    ".smush_amount("  xx"), 7);
+        assert_eq!("x   ".smush_amount("  xx"), 6);
+        assert_eq!("xx  ".smush_amount("  xx"), 5);
         assert_eq!("xxx ".smush_amount("  xx"), 4);
         assert_eq!("xxxx".smush_amount("  xx"), 3);
 
-        assert_eq!("    ".smush_amount(" xxx"), 4);
-        assert_eq!("x   ".smush_amount(" xxx"), 4);
+        assert_eq!("    ".smush_amount(" xxx"), 6);
+        assert_eq!("x   ".smush_amount(" xxx"), 5);
         assert_eq!("xx  ".smush_amount(" xxx"), 4);
         assert_eq!("xxx ".smush_amount(" xxx"), 3);
         assert_eq!("xxxx".smush_amount(" xxx"), 2);
 
-        assert_eq!("    ".smush_amount("xxxx"), 4);
+        assert_eq!("    ".smush_amount("xxxx"), 5);
         assert_eq!("x   ".smush_amount("xxxx"), 4);
         assert_eq!("xx  ".smush_amount("xxxx"), 3);
         assert_eq!("xxx ".smush_amount("xxxx"), 2);
