@@ -12,3 +12,7 @@ name = "rustlet"
 path = "src/main.rs"
 
 [dependencies]
+getopts = "0.2"
+
+[profile.release]
+lto = true
