@@ -32,11 +32,20 @@ impl<'a> Smusher<'a> {
     }
 
     pub fn amount(self, c: FIGchar) -> usize {
-        smusher_amount(&self.output, &c, self.font.hardblank, self.mode)
+        amount(&self.output, &c, self.font.hardblank, self.mode)
+    }
+
+    pub fn get(&self) -> Vec<String> {
+        let mut res: Vec<String> = Vec::new();
+
+        for line in &self.output {
+            res.push(line.replace(&self.font.hardblank.to_string(), " "));
+        }
+        res
     }
 
     pub fn print(self) {
-        for p in self.output {
+        for p in self.get() {
             println!("{}", p);
         }
     }
@@ -51,26 +60,12 @@ impl<'a> Smusher<'a> {
 
     pub fn add_char(&mut self, ch: &char) -> Result<(), Box<Error>> {
         let fc = self.font.get(ch);
-        self.output = try!(smusher_smush(&self.output, fc, self.font.hardblank, self.mode));
+        self.output = try!(smush(&self.output, fc, self.font.hardblank, self.mode));
         Ok(())
-    }
-
-    fn smush_char(self, l: char, r: char) -> Option<char> {
-
-        //cmp_return_other!(' ', l, r);
-
-/*
-        // Disallows overlapping if previous character or current character has a
-        // width of 1 or zero
-        if self.prev_width < 2 || self.curr_width < 2 {
-            return None
-        }
-*/
-        charsmush::smush(l, r, self.font.hardblank, self.right2left, self.mode)
     }
 }
 
-fn smusher_amount(output: &Vec<String>, c: &FIGchar, hardblank: char, mode: u32) -> usize {
+fn amount(output: &Vec<String>, c: &FIGchar, hardblank: char, mode: u32) -> usize {
     let mut amt = 9999;
     for i in 0..output.len() {
         amt = min(amt, strsmush::amount(&output[i], &c.lines[i], hardblank, mode));
@@ -78,9 +73,9 @@ fn smusher_amount(output: &Vec<String>, c: &FIGchar, hardblank: char, mode: u32)
     amt
 }
 
-fn smusher_smush(output: &Vec<String>, fc: &FIGchar, hardblank: char, mode: u32) -> Result<Vec<String>, Box<Error>> {
+fn smush(output: &Vec<String>, fc: &FIGchar, hardblank: char, mode: u32) -> Result<Vec<String>, Box<Error>> {
 
-    let amt = smusher_amount(&output, fc, hardblank, mode);
+    let amt = amount(&output, fc, hardblank, mode);
     let mut res = Vec::new();
 
     for i in 0..output.len() {
@@ -99,21 +94,21 @@ mod tests {
     }
 
     #[test]
-    fn test_smusher_amount() {
+    fn test_amount() {
         let output = vec_of_strings![ "", "", "", "" ];
         let fc = FIGchar{ lines: vec_of_strings![ "   ", "  x", " xx", "xx " ] };
-        assert_eq!(smusher_amount(&output, &fc, '$', 0xbf), 0);
+        assert_eq!(amount(&output, &fc, '$', 0xbf), 0);
 
         let output = vec_of_strings![ "", "", "", "" ];
         let fc = FIGchar{ lines: vec_of_strings![ "   ", "  x", " xx", "   " ] };
-        assert_eq!(smusher_amount(&output, &fc, '$', 0xbf), 1);
+        assert_eq!(amount(&output, &fc, '$', 0xbf), 1);
 
         let output = vec_of_strings![ "xxx ", "xx  ", "x   ", "    " ];
         let fc = FIGchar{ lines: vec_of_strings![ "   y", "  yy", " yyy", "yyyy" ] };
-        assert_eq!(smusher_amount(&output, &fc, '$', 0xbf), 4);
+        assert_eq!(amount(&output, &fc, '$', 0xbf), 4);
 
         let output = vec_of_strings![  "xxxx ", "xxx  ", "xx   ", "x    " ];
         let fc = FIGchar{ lines: vec_of_strings![ "   x", "  xx", " xxx", "xxxx" ] };
-        assert_eq!(smusher_amount(&output, &fc, '$', 0xbf), 5);
+        assert_eq!(amount(&output, &fc, '$', 0xbf), 5);
     }
 }

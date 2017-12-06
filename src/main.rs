@@ -18,7 +18,7 @@ fn process() -> Result<(), Box<Error>> {
     try!(font.load(PathBuf::from("/usr/share/figlet/small.flf")));
 
     let mut sm = rustlet::Smusher::new(&font);
-    sm.add_str(&"Hello world!");
+    try!(sm.add_str(&"Hello world!"));
     sm.print();
 
     Ok(())

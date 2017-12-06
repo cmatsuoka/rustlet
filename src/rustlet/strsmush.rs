@@ -100,10 +100,6 @@ fn get_pair(s1: &str, s2: &str, amt: usize) -> Option<(char, char)> {
 mod tests {
     use super::*;
 
-    macro_rules! vec_of_strings {
-        ( $($x:expr),* ) => (vec![$($x.to_string()),*])
-    }
-
     #[test]
     fn test_get_pair() {
         assert_eq!(get_pair("    ", "    ", 2), None);
