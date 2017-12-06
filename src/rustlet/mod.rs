@@ -81,7 +81,6 @@ fn smusher_amount(output: &Vec<String>, c: &FIGchar, hardblank: char, mode: u32)
 fn smusher_smush(output: &Vec<String>, fc: &FIGchar, hardblank: char, mode: u32) -> Result<Vec<String>, Box<Error>> {
 
     let amt = smusher_amount(&output, fc, hardblank, mode);
-println!("> amt={}", amt);
     let mut res = Vec::new();
 
     for i in 0..output.len() {

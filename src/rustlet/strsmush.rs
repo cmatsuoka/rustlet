@@ -17,7 +17,6 @@ pub fn amount(s1: &str, s2: &str, hardblank: char, mode: u32) -> usize {
         None      => s2.len(),
     };
 
-println!(">> s1={:?} s2={:?} a1={} a2={}", s1, s2, a1, a2);
     let amt = a1 + a2;
 
     // Retrieve character pair and see if they're smushable
@@ -31,37 +30,45 @@ println!(">> s1={:?} s2={:?} a1={} a2={}", s1, s2, a1, a2);
     }
 }
 
-pub fn smush(s1: &str, s2: &str, mut amt: usize, hardblank: char, right2left: bool,
+pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: bool,
              mode: u32) -> Result<String, Box<Error>> {
 
-    /*let a2 = match s2.find(|x| { let y:char = x; !y.is_whitespace() }) {
-        Some(val) => val,
-        None      => s2.len(),
-    };
+    let mut s2 = s2x;
 
-    let s2 = s2.trim_left();
-    if a2 > amt {
-        amt = 0;
-    } else {
-        amt -= a2;
-    }*/
-    let mut limit: usize;
     if amt > s1.len() {
-        limit = 1;
-    } else {
-        limit = s1.len() - amt;
+        s2 = &s2[amt - s1.len()..];
+        amt = s1.len();
     }
-    let mut res = s1[..limit].to_string();
-println!("s1={:?} s2={:?} amt={} res={:?}", s1, s2, amt, res);
 
-    let (l, r) = match get_pair(s1, s2, amt) {
-        Some(pair) => pair,
-        None       => { res.push_str(s2); return Ok(res) },
-    };
+    let mut res = "".to_string();
+    let m1 = s1.len() - amt;
 
-    match charsmush::smush(l, r, hardblank, false, mode) {
-        Some(c) => { res.push(c); res.push_str(&s2[1..]) },
-        None    => res += s2,
+    // part 1: only characters from s1
+    for c in s1[..m1].chars() {
+        res.push(c);
+    }
+
+    // part 2: s1 and s2 overlap
+    for i in 0..s2.len() {
+        let l = match s1.chars().nth(m1 + i) {
+            Some(v) => v,
+            None    => ' ',
+        };
+        let r = s2.chars().nth(i).unwrap();
+        if l != ' ' && r != ' ' {
+            match charsmush::smush(l, r, hardblank, false, mode) {
+                Some(c) => res.push(c),
+                None    => res.push(r),
+            }
+        } else {
+            res.push(match l { ' ' => r, _ => l });
+        }
+    }
+
+    // part 3: remainder of s1 after the end of s2
+    let m2 = m1 + s2.len();
+    if s1.len() > m2 {
+        res.push_str(&s1[m2..]);
     }
 
     Ok(res)
@@ -165,6 +172,6 @@ mod tests {
         assert_eq!(smush("123! ", "   xy", 5, '$', false, 0xbf).ok(), Some("123xy".to_string()));
         assert_eq!(smush("123/ ", "   /y", 5, '$', false, 0xbf).ok(), Some("123/y".to_string()));
         assert_eq!(smush("", "   y", 3, '$', false, 0xbf).ok(), Some("y".to_string()));
-        assert_eq!(smush("", "      ", 1, '$', false, 0xbf).ok(), Some("".to_string()));
+        assert_eq!(smush("", "      ", 1, '$', false, 0xbf).ok(), Some("     ".to_string()));
     }
 }
