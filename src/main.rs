@@ -1,7 +1,6 @@
 extern crate rustlet;
 
 use std::error::Error;
-use std::path::PathBuf;
 use rustlet::figfont::FIGfont;
 
 
@@ -15,10 +14,10 @@ fn main() {
 
 fn process() -> Result<(), Box<Error>> {
     let mut font = FIGfont::new();
-    try!(font.load(PathBuf::from("/usr/share/figlet/small.flf")));
+    try!(font.load("/usr/share/figlet/small.flf"));
 
     let mut sm = rustlet::Smusher::new(&font);
-    try!(sm.add_str(&"Hello world!"));
+    try!(sm.push_str(&"Hello world!"));
     sm.print();
 
     Ok(())

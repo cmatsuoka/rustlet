@@ -46,9 +46,9 @@ impl FIGfont {
         }
     } 
 
-    pub fn load(&mut self, path: PathBuf) -> Result<&Self, Box<Error>> {
+    pub fn load(&mut self, name: &str) -> Result<&Self, Box<Error>> {
 
-        let file = try!(File::open(path));
+        let file = try!(File::open(PathBuf::from(name)));
         let mut f = BufReader::new(&file);
 
         let mut line = String::with_capacity(200);

@@ -50,15 +50,15 @@ impl<'a> Smusher<'a> {
         }
     }
 
-    pub fn add_str(&mut self, s: &str) -> Result<(), Box<Error>> {
+    pub fn push_str(&mut self, s: &str) -> Result<(), Box<Error>> {
         for c in s.chars() {
-            try!(self.add_char(&c));
+            try!(self.push(&c));
         }
 
         Ok(())
     }
 
-    pub fn add_char(&mut self, ch: &char) -> Result<(), Box<Error>> {
+    pub fn push(&mut self, ch: &char) -> Result<(), Box<Error>> {
         let fc = self.font.get(ch);
         self.output = try!(smush(&self.output, fc, self.font.hardblank, self.mode));
         Ok(())
