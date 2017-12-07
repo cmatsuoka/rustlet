@@ -3,7 +3,6 @@ use std::error::Error;
 use super::charsmush;
 
 
-
 // Compute the number of characters a string can be smushed into another string.
 pub fn amount(s1: &str, s2: &str, hardblank: char, mode: u32) -> usize {
 

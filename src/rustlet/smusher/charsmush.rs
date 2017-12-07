@@ -1,4 +1,4 @@
-use super::figfont;
+use super::super::figfont;
 
 macro_rules! cmp_return_other {
     ( $a:expr, $b:expr, $c:expr ) => {
