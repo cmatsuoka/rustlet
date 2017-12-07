@@ -53,8 +53,13 @@ impl<'a> Wrapper<'a> {
     ///    println!("{}", line);
     /// }
     /// ```
-    pub fn get(self) -> Vec<String> {
+    pub fn get(&self) -> Vec<String> {
         self.sm.get()
+    }
+
+    /// Get the length in characters of the current output buffer.
+    pub fn len(&self) -> usize {
+        self.sm.len()
     }
 
     /// Add a string to the output buffer. If adding the string results in a line
@@ -66,8 +71,8 @@ impl<'a> Wrapper<'a> {
 
         if self.sm.len() > self.width {
             let b = self.buffer.clone();
-            try!(self.sm.push_str(&b));
             self.sm.clear();
+            try!(self.sm.push_str(&b));
             return Err(From::from("line full".to_string()))
         }
 
@@ -84,8 +89,8 @@ impl<'a> Wrapper<'a> {
 
         if self.sm.len() > self.width {
             let b = self.buffer.clone();
-            try!(self.sm.push_str(&b));
             self.sm.clear();
+            try!(self.sm.push_str(&b));
             return Err(From::from("line full".to_string()))
         }
 

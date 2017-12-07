@@ -80,12 +80,31 @@ fn process(fontname: &str) -> Result<(), Box<Error>> {
     let mut sm = rustlet::Smusher::new(&font);
     let mut wr = rustlet::Wrapper::new(&mut sm, 80);
 
-    try!(wr.push_str("Hello"));
-    try!(wr.push_str("world!"));
+    let s = "The quick brown fox jumps over the lazy dog";
 
-    for line in wr.get() {
-        println!("{}", line);
-    }
+    write_line(&mut wr, &s);
 
     Ok(())
+}
+
+fn write_line(wr: &mut rustlet::Wrapper, s: &str) {
+
+    let v: Vec<&str> = s.split(' ').collect();
+    for word in v {
+        match wr.push_str(word) {
+            Ok(_)  => {},
+            Err(_) => {
+                print_output(&wr);
+                wr.clear();
+                wr.push_str(word);
+            }
+        }
+    }
+    print_output(&wr);
+}
+
+fn print_output(wr: &rustlet::Wrapper) {
+    for line in &wr.get() {
+        println!("{}", line);
+    }
 }
