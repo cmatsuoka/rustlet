@@ -6,7 +6,8 @@ pub use super::wrapper::Wrapper;
 mod charsmush;
 mod strsmush;
 
-
+/// Creates a message written with ASCII-art characters.
+///
 /// The Smusher adds FIGcharacters to an output buffer and controls how they share
 /// border sub-characters with the content that's already in the buffer. Details
 /// of how exactly this smushing happens is given by its layout mode.

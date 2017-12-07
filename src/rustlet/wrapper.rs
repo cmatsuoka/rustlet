@@ -1,7 +1,7 @@
 use std::error::Error;
 use super::Smusher;
 
-/// Render FIGcharacters with word wrapping.
+/// Render smushed ASCII-art characters with word wrapping.
 ///
 /// Wrapper receives string or character input and renders the corresponding
 /// FIGcharacters if the output text fits inside the maximum width specified on
@@ -61,7 +61,7 @@ impl<'a> Wrapper<'a> {
     ///
     /// // Get and print the current output buffer contents
     /// for line in wr.get() {
-    ///    println!("{}", line);
+    ///     println!("{}", line);
     /// }
     /// # Ok(())
     /// # }
@@ -70,7 +70,7 @@ impl<'a> Wrapper<'a> {
         self.sm.get()
     }
 
-    /// Get the length in characters of the current output buffer.
+    /// Get the length in sub-characters of the current output buffer.
     pub fn len(&self) -> usize {
         self.sm.len()
     }
