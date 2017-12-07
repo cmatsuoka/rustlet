@@ -78,7 +78,7 @@ impl<'a> Smusher<'a> {
         Ok(())
     }
 
-    pub fn push(&mut self, ch: char) -> Result<(), Box<Error>> {
+    pub fn push(&mut self, mut ch: char) -> Result<(), Box<Error>> {
         let fc = self.font.get(ch);
         self.output = try!(smush(&self.output, fc, self.font.hardblank, self.mode));
         Ok(())

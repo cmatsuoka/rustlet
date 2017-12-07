@@ -2,6 +2,7 @@ extern crate getopts;
 extern crate rustlet;
 
 use std::env;
+use std::io::{self, BufRead};
 use std::error::Error;
 use std::path::{self, PathBuf};
 use getopts::Options;
@@ -50,7 +51,8 @@ fn main() {
         None       => fontpath.push(DEFAULT_FONT),
     }
 
-    match process(&fontpath.into_os_string().into_string().unwrap()) {
+    let msg = matches.free.join(" ");
+    match process(&fontpath.into_os_string().into_string().unwrap(), &msg) {
         Err(e) => { println!("Error: {}", e) }
         Ok(_)  => {},
     }
@@ -73,22 +75,29 @@ fn find_font(mut fontpath: PathBuf, mut name: String) -> PathBuf {
     PathBuf::from(&name)
 }
 
-fn process(fontname: &str) -> Result<(), Box<Error>> {
+fn process(fontname: &str, msg: &str) -> Result<(), Box<Error>> {
     let mut font = FIGfont::new();
     try!(font.load(fontname));
 
     let mut sm = rustlet::Smusher::new(&font);
     let mut wr = rustlet::Wrapper::new(&mut sm, 80);
 
-    let s = "The quick brown fox jumps over the lazy dog";
-
-    write_line(&mut wr, &s);
+    if msg.len() > 0 {
+        // read message from command line parameters
+        write_line(&mut wr, &msg)
+    } else {
+        // read message from stdin
+        let input = io::BufReader::new(io::stdin());
+        for line in input.lines() {
+            write_line(&mut wr, &line.unwrap())
+        }
+    }
 
     Ok(())
 }
 
 fn write_line(wr: &mut rustlet::Wrapper, s: &str) {
-
+    wr.clear();
     let v: Vec<&str> = s.split(' ').collect();
     for word in v {
         match wr.push_str(word) {
