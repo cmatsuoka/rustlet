@@ -19,11 +19,16 @@ impl<'a> Wrapper<'a> {
     /// # Examples
     ///
     /// ```
+    /// # fn foo() -> Result<(), Box<std::error::Error>> {
     /// // Create a smusher using the specified FIGfont
-    /// let mut sm = rustlet::Smusher::new("small.flf");
+    /// let mut font = rustlet::FIGfont::new();
+    /// font.load("small.flf")?;
+    /// let mut sm = rustlet::Smusher::new(&font);
     ///
     /// // Create a line wrapper using our smusher and maximum width of 80 columns
     /// let mut wr = rustlet::Wrapper::new(&mut sm, 80);
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn new(sm: &'a mut Smusher<'a>, width: usize) -> Self {
         Wrapper{
@@ -44,14 +49,22 @@ impl<'a> Wrapper<'a> {
     /// # Examples
     ///
     /// ```
-    /// let mut sm = rustlet::Smusher::new("small.flf");
+    /// # fn foo() -> Result<(), Box<std::error::Error>> {
+    /// // Create a new wrapper
+    /// let mut font = rustlet::FIGfont::new();
+    /// font.load("small.flf")?;
+    /// let mut sm = rustlet::Smusher::new(&font);
     /// let mut wr = rustlet::Wrapper::new(&mut sm, 80);
     ///
-    /// try!(wr.push_str("hello"));
+    /// // Add a string to the output buffer
+    /// wr.push_str("hello")?;
     ///
+    /// // Get and print the current output buffer contents
     /// for line in wr.get() {
     ///    println!("{}", line);
     /// }
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn get(&self) -> Vec<String> {
         self.sm.get()
@@ -62,9 +75,12 @@ impl<'a> Wrapper<'a> {
         self.sm.len()
     }
 
-    /// Add a string to the output buffer. If adding the string results in a line
-    /// wider than the maximum number of columns, the string is not added and an
-    /// error is returned.
+    /// Add a string to the output buffer.
+    ///
+    /// # Errors
+    ///
+    /// If adding the string results in a line wider than the maximum number of columns,
+    /// the string is not added to the output buffer and an error is returned.
     pub fn push_str(&mut self, s: &str) -> Result<(), Box<Error>> {
         try!(self.sm.push(' '));
         try!(self.sm.push_str(s));
@@ -81,9 +97,12 @@ impl<'a> Wrapper<'a> {
         Ok(())
     }
 
-    /// Add a character to the output buffer. If adding the character results in a
-    /// line wider than the maximum number of columns, the character is not added
-    /// and an error is returned.
+    /// Add a character to the output buffer.
+    ///
+    /// # Errors
+    ///
+    /// If adding the character results in a line wider than the maximum number of columns,
+    /// the character is not added to the output buffer and an error is returned.
     pub fn push(&mut self, ch: char) -> Result<(), Box<Error>> {
         try!(self.sm.push(ch));
 

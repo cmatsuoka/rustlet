@@ -7,9 +7,12 @@ mod charsmush;
 mod strsmush;
 
 
+/// The Smusher adds FIGcharacters to an output buffer and controls how they share
+/// border sub-characters with the content that's already in the buffer. Details
+/// of how exactly this smushing happens is given by its layout mode.
 #[derive(Debug)]
 pub struct Smusher<'a> {
-    mode      : u32,
+    pub mode  : u32,          // the layout mode
     right2left: bool,
     font      : &'a FIGfont,
     output    : Vec<String>,
@@ -18,6 +21,21 @@ pub struct Smusher<'a> {
 
 impl<'a> Smusher<'a> {
 
+    /// Create a new smusher using the specified FIGfont.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn foo() -> Result<(), Box<std::error::Error>> {
+    /// // Load a FIGfont
+    /// let mut font = rustlet::FIGfont::new();
+    /// font.load("small.flf")?;
+    ///
+    /// // Create a smusher using the FIGfont
+    /// let mut sm = rustlet::Smusher::new(&font);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn new(font: &'a FIGfont) -> Self {
         let mut sm = Smusher{
             font,
@@ -31,10 +49,13 @@ impl<'a> Smusher<'a> {
         sm
     }
 
+    /// Get the number of sub-characters a given FIGcharacter can be smushed into
+    /// the output buffer.
     pub fn amount(self, c: FIGchar) -> usize {
         amount(&self.output, &c, self.font.hardblank, self.mode)
     }
 
+    /// Get the contents of the output buffer.
     pub fn get(&self) -> Vec<String> {
         let mut res: Vec<String> = Vec::new();
         for line in &self.output {
