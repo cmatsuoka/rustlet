@@ -39,10 +39,10 @@ impl FIGfont {
         font
     }
 
-    pub fn get(&self, ch: &char) -> &FIGchar {
-        match self.chars.get(ch) {
+    pub fn get(&self, ch: char) -> &FIGchar {
+        match self.chars.get(&ch) {
             Some(k) => k,
-            None    => self.get(&' '),
+            None    => self.get(' '),
         }
     } 
 
