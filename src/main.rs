@@ -4,8 +4,8 @@ extern crate rustlet;
 use std::env;
 use std::error::Error;
 use std::path::{self, PathBuf};
-use getopts::{Matches, Options};
-use rustlet::figfont::FIGfont;
+use getopts::Options;
+use rustlet::FIGfont;
 
 const FONT_DIR    : &'static str = "/usr/share/figlet";
 const DEFAULT_FONT: &'static str = "standard.flf";
@@ -78,9 +78,13 @@ fn process(fontname: &str) -> Result<(), Box<Error>> {
     try!(font.load(fontname));
 
     let mut sm = rustlet::Smusher::new(&font);
-    try!(sm.push_word(&"Hello"));
-    try!(sm.push_word(&"world!"));
-    sm.print();
+    let mut wr = rustlet::Wrapper::using(&mut sm, 80);
+    try!(wr.push_str("Hello"));
+    try!(wr.push_str("world!"));
+
+    for line in wr.get() {
+        println!("{}", line);
+    }
 
     Ok(())
 }

@@ -1,20 +1,17 @@
 use std::cmp::min;
 use std::error::Error;
-use self::figfont::{FIGchar, FIGfont};
+pub use self::figfont::{FIGchar, FIGfont};
+pub use self::wrapper::Wrapper;
 
-pub mod figfont;
+mod figfont;
 mod charsmush;
 mod strsmush;
-
+mod wrapper;
 
 #[derive(Debug)]
 pub struct Smusher<'a> {
-    pub width : usize,
-    buffer    : String,
-    last      : String,
     mode      : u32,
     right2left: bool,
-    wrap      : bool,
     font      : &'a FIGfont,
     output    : Vec<String>,
 }
@@ -24,24 +21,15 @@ impl<'a> Smusher<'a> {
 
     pub fn new(font: &'a FIGfont) -> Self {
         let mut sm = Smusher{
-            width     : 80,
-            buffer    : String::new(),
-            last      : String::new(),
             font,
             mode      : font.layout,
             right2left: false,
-            wrap      : true,
             output    : Vec::new(),
         };
         for _ in 0..sm.font.height {
             sm.output.push("".to_string());
         }
         sm
-    }
-
-    pub fn set_wrap(mut self, width: usize) {
-        self.width = width;
-        self.wrap = width > 0;
     }
 
     pub fn amount(self, c: FIGchar) -> usize {
@@ -56,61 +44,20 @@ impl<'a> Smusher<'a> {
         res
     }
 
-    pub fn print(self) {
-        for p in self.get() {
-            println!("{}", p);
-        }
-    }
-
     pub fn clear(&mut self) {
-        self.clear_output();
-        self.buffer.clear();
-    }
-
-    fn clear_output(&mut self) {
         for i in 0..self.output.len() {
             self.output[i].clear();
         }
     }
 
-    pub fn push_word(&mut self, word: &str) -> Result<(), Box<Error>> {
-        try!(self.push(' '));
-        try!(self.push_str(word));
-
-        if self.wrap && (self.len() > self.width) {
-            let b = self.buffer.clone();
-            try!(self.push_str(&b));
-            self.clear_output();
-            return Err(From::from("line full".to_string()))
-        }
-
-        self.buffer.push(' ');
-        self.buffer.push_str(word);
-        Ok(())
-    }
-
-    pub fn push_char(&mut self, ch: char) -> Result<(), Box<Error>> {
-        try!(self.push(ch));
-
-        if self.wrap && (self.len() > self.width) {
-            let b = self.buffer.clone();
-            try!(self.push_str(&b));
-            self.clear_output();
-            return Err(From::from("line full".to_string()))
-        }
-
-        self.buffer.push(ch);
-        Ok(())
-    }
-
-    fn push_str(&mut self, s: &str) -> Result<(), Box<Error>> {
+    pub fn push_str(&mut self, s: &str) -> Result<(), Box<Error>> {
         for c in s.chars() {
             try!(self.push(c));
         }
         Ok(())
     }
 
-    fn push(&mut self, ch: char) -> Result<(), Box<Error>> {
+    pub fn push(&mut self, ch: char) -> Result<(), Box<Error>> {
         let fc = self.font.get(ch);
         self.output = try!(smush(&self.output, fc, self.font.hardblank, self.mode));
         Ok(())
