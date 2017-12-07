@@ -78,7 +78,8 @@ fn process(fontname: &str) -> Result<(), Box<Error>> {
     try!(font.load(fontname));
 
     let mut sm = rustlet::Smusher::new(&font);
-    let mut wr = rustlet::Wrapper::using(&mut sm, 80);
+    let mut wr = rustlet::Wrapper::new(&mut sm, 80);
+
     try!(wr.push_str("Hello"));
     try!(wr.push_str("world!"));
 

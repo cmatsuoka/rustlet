@@ -10,6 +10,7 @@ path = "src/rustlet/mod.rs"
 [[bin]]
 name = "rustlet"
 path = "src/main.rs"
+doc = false
 
 [dependencies]
 getopts = "0.2"
