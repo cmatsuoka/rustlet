@@ -1,12 +1,11 @@
 extern crate getopts;
-extern crate rustlet;
+extern crate fig;
 
 use std::env;
 use std::io::{self, BufRead};
 use std::error::Error;
 use std::path::{self, PathBuf};
 use getopts::Options;
-use rustlet::FIGfont;
 
 const FONT_DIR    : &'static str = "/usr/share/figlet";
 const DEFAULT_FONT: &'static str = "standard.flf";
@@ -76,11 +75,11 @@ fn find_font(mut fontpath: PathBuf, mut name: String) -> PathBuf {
 }
 
 fn process(fontname: &str, msg: &str) -> Result<(), Box<Error>> {
-    let mut font = FIGfont::new();
+    let mut font = fig::FIGfont::new();
     try!(font.load(fontname));
 
-    let mut sm = rustlet::Smusher::new(&font);
-    let mut wr = rustlet::Wrapper::new(&mut sm, 80);
+    let mut sm = fig::Smusher::new(&font);
+    let mut wr = fig::Wrapper::new(&mut sm, 80);
 
     if msg.len() > 0 {
         // read message from command line parameters
@@ -96,7 +95,7 @@ fn process(fontname: &str, msg: &str) -> Result<(), Box<Error>> {
     Ok(())
 }
 
-fn write_line(wr: &mut rustlet::Wrapper, s: &str) {
+fn write_line(wr: &mut fig::Wrapper, s: &str) {
     wr.clear();
     for word in s.split_whitespace() {
         match wr.push_str(word) {
@@ -111,7 +110,7 @@ fn write_line(wr: &mut rustlet::Wrapper, s: &str) {
     print_output(&wr);
 }
 
-fn print_output(wr: &rustlet::Wrapper) {
+fn print_output(wr: &fig::Wrapper) {
     for line in &wr.get() {
         println!("{}", line);
     }
