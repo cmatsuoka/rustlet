@@ -65,6 +65,10 @@ impl<'a> Smusher<'a> {
         res
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.output[0].is_empty()
+    }
+
     pub fn clear(&mut self) {
         for i in 0..self.output.len() {
             self.output[i].clear();
@@ -78,7 +82,7 @@ impl<'a> Smusher<'a> {
         Ok(())
     }
 
-    pub fn push(&mut self, mut ch: char) -> Result<(), Box<Error>> {
+    pub fn push(&mut self, ch: char) -> Result<(), Box<Error>> {
         let fc = self.font.get(ch);
         self.output = try!(smush(&self.output, fc, self.font.hardblank, self.mode));
         Ok(())

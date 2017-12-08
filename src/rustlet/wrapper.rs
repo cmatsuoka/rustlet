@@ -82,7 +82,11 @@ impl<'a> Wrapper<'a> {
     /// If adding the string results in a line wider than the maximum number of columns,
     /// the string is not added to the output buffer and an error is returned.
     pub fn push_str(&mut self, s: &str) -> Result<(), Box<Error>> {
-        try!(self.sm.push(' '));
+        let empty = self.sm.is_empty();
+
+        if !empty {
+            try!(self.sm.push(' '));
+        }
         try!(self.sm.push_str(s));
 
         if self.sm.len() > self.width {
@@ -92,7 +96,9 @@ impl<'a> Wrapper<'a> {
             return Err(From::from("line full".to_string()))
         }
 
-        self.buffer.push(' ');
+        if !empty {
+            self.buffer.push(' ');
+        }
         self.buffer.push_str(s);
         Ok(())
     }

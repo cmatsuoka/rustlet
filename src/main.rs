@@ -98,8 +98,7 @@ fn process(fontname: &str, msg: &str) -> Result<(), Box<Error>> {
 
 fn write_line(wr: &mut rustlet::Wrapper, s: &str) {
     wr.clear();
-    let v: Vec<&str> = s.split(' ').collect();
-    for word in v {
+    for word in s.split_whitespace() {
         match wr.push_str(word) {
             Ok(_)  => {},
             Err(_) => {
