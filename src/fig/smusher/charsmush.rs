@@ -53,7 +53,7 @@ pub fn smush(l: char, r: char, hardblank: char, right2left: bool, mode: u32) -> 
     cmp_return_other!(' ', l, r);
 
     // Kerning mode
-    if mode & 64 != 0 {
+    if mode & figfont::SMUSH_KERN != 0 {
         return None;
     }
 

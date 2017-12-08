@@ -26,7 +26,7 @@ pub struct FIGfont {
     pub height    : usize,
     baseline      : usize,    // number of lines from the baseline of a FIGcharacter
     max_length    : usize,    // maximum length of any line describing a FIGcharacter
-    pub old_layout: u32,
+    pub old_layout: i32,
     comment_lines : usize,    // number of comment lines at the start of the file
     right_to_left : bool,
     pub layout    : u32,

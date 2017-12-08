@@ -13,10 +13,11 @@ mod strsmush;
 /// of how exactly this smushing happens is given by its layout mode.
 #[derive(Debug)]
 pub struct Smusher<'a> {
-    pub mode  : u32,          // the layout mode
-    right2left: bool,
-    font      : &'a FIGfont,
-    output    : Vec<String>,
+    pub mode      : u32,          // the layout mode
+    pub full_width: bool,
+    pub right2left: bool,
+    font          : &'a FIGfont,
+    output        : Vec<String>,
 }
 
 
@@ -41,6 +42,7 @@ impl<'a> Smusher<'a> {
         let mut sm = Smusher{
             font,
             mode      : font.layout,
+            full_width: font.old_layout == -1,
             right2left: false,
             output    : Vec::new(),
         };
@@ -48,12 +50,6 @@ impl<'a> Smusher<'a> {
             sm.output.push("".to_string());
         }
         sm
-    }
-
-    /// Get the number of sub-characters a given FIGcharacter can be smushed into
-    /// the output buffer.
-    pub fn amount(self, c: FIGchar) -> usize {
-        amount(&self.output, &c, self.font.hardblank, self.mode)
     }
 
     /// Get the contents of the output buffer.
@@ -66,6 +62,9 @@ impl<'a> Smusher<'a> {
     }
 
     pub fn is_empty(&self) -> bool {
+        if self.output.len() == 0 {
+            return true;
+        }
         self.output[0].is_empty()
     }
 
@@ -84,7 +83,7 @@ impl<'a> Smusher<'a> {
 
     pub fn push(&mut self, ch: char) -> Result<(), Box<Error>> {
         let fc = self.font.get(ch);
-        self.output = try!(smush(&self.output, fc, self.font.hardblank, self.mode));
+        self.output = try!(smush(&self.output, fc, self.font.hardblank, self.full_width, self.mode));
         Ok(())
     }
 
@@ -101,9 +100,13 @@ fn amount(output: &Vec<String>, c: &FIGchar, hardblank: char, mode: u32) -> usiz
     amt
 }
 
-fn smush(output: &Vec<String>, fc: &FIGchar, hardblank: char, mode: u32) -> Result<Vec<String>, Box<Error>> {
+fn smush(output: &Vec<String>, fc: &FIGchar, hardblank: char, full_width: bool, mode: u32) -> Result<Vec<String>, Box<Error>> {
 
-    let amt = amount(&output, fc, hardblank, mode);
+    let amt = match full_width {
+        true  => 0,
+        false => amount(&output, fc, hardblank, mode),
+    };
+
     let mut res = Vec::new();
 
     for i in 0..output.len() {

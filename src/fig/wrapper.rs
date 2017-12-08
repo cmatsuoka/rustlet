@@ -50,10 +50,6 @@ impl<'a> Wrapper<'a> {
         self.buffer.clear();
     }
 
-    pub fn smush_mode(&mut self, mode: u32) {
-        self.sm.mode = mode;
-    }
-
     /// Retrieve the output buffer lines.
     ///
     /// # Examples

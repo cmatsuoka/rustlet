@@ -80,11 +80,14 @@ fn process(path: &Path, msg: &str, matches: &Matches) -> Result<(), Box<Error>> 
     try!(font.load(path));
 
     let mut sm = fig::Smusher::new(&font);
-    let mut wr = fig::Wrapper::new(&mut sm, 80);
 
     if matches.opt_present("k") {
-        wr.smush_mode(fig::SMUSH_KERN);
+        sm.mode = fig::SMUSH_KERN;
+    } else if matches.opt_present("W") {
+        sm.full_width = true;
     }
+
+    let mut wr = fig::Wrapper::new(&mut sm, 80);
 
     if msg.len() > 0 {
         // read message from command line parameters
