@@ -52,6 +52,11 @@ pub fn smush(l: char, r: char, hardblank: char, right2left: bool, mode: u32) -> 
 
     cmp_return_other!(' ', l, r);
 
+    // Kerning mode
+    if mode & 64 != 0 {
+        return None;
+    }
+
     // Universal smushing simply overrides the sub-character from the earlier
     // FIGcharacter with the sub-character from the later FIGcharacter. This
     // produces an "overlapping" effect with some FIGfonts, wherin the latter

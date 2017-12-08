@@ -13,6 +13,8 @@ use std::path::Path;
 #[allow(dead_code)] pub const SMUSH_PAIR     : u32 = 8;
 #[allow(dead_code)] pub const SMUSH_BIGX     : u32 = 16;
 #[allow(dead_code)] pub const SMUSH_HARDBLANK: u32 = 32;
+#[allow(dead_code)] pub const SMUSH_KERN     : u32 = 64;
+#[allow(dead_code)] pub const SMUSH_ENABLE   : u32 = 128;
 
 const ERR_INVALID: &'static str = "invalid font file";
 
