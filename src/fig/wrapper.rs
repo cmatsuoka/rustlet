@@ -13,9 +13,9 @@ enum Align {
 /// FIGcharacters if the output text fits inside the maximum width specified on
 /// creation.
 pub struct Wrapper<'a> {
-    sm       : &'a mut Smusher<'a>,
-    buffer   : String,
-    pub width: usize,
+    sm        : &'a mut Smusher<'a>,
+    pub buffer: String,
+    pub width : usize,
 }
 
 impl<'a> Wrapper<'a> {
@@ -125,6 +125,12 @@ impl<'a> Wrapper<'a> {
             return Err(From::from("line full".to_string()))
         }
 
+        self.buffer.push(ch);
+        Ok(())
+    }
+
+    pub fn push_nowrap(&mut self, ch: char) -> Result<(), Box<Error>> {
+        try!(self.sm.push(ch));
         self.buffer.push(ch);
         Ok(())
     }

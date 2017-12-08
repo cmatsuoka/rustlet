@@ -117,11 +117,29 @@ fn write_line(wr: &mut fig::Wrapper, s: &str) {
             Err(_) => {
                 print_output(&wr);
                 wr.clear();
-                wr.push_str(word);
+                match wr.push_str(word) {
+                    Ok(_)  => {},
+                    Err(_) => write_word(wr, word),
+                }
             }
         }
     }
     print_output(&wr);
+}
+
+fn write_word(wr: &mut fig::Wrapper, word: &str) {
+    for c in word.chars() {
+        match wr.push(c) {
+            Ok(_)  => {},
+            Err(_) => {
+                if !wr.buffer.is_empty() {
+                    print_output(&wr);
+                    wr.clear();
+                }
+                wr.push_nowrap(c);
+            }
+        }
+    }
 }
 
 fn print_output(wr: &fig::Wrapper) {
