@@ -4,7 +4,7 @@ extern crate fig;
 use std::env;
 use std::io::{self, BufRead};
 use std::error::Error;
-use std::path::{self, PathBuf};
+use std::path::{self, Path, PathBuf};
 use getopts::Options;
 
 const FONT_DIR    : &'static str = "/usr/share/figlet";
@@ -51,7 +51,7 @@ fn main() {
     }
 
     let msg = matches.free.join(" ");
-    match process(&fontpath.into_os_string().into_string().unwrap(), &msg) {
+    match process(&fontpath, &msg) {
         Err(e) => { println!("Error: {}", e) }
         Ok(_)  => {},
     }
@@ -74,9 +74,9 @@ fn find_font(mut fontpath: PathBuf, mut name: String) -> PathBuf {
     PathBuf::from(&name)
 }
 
-fn process(fontname: &str, msg: &str) -> Result<(), Box<Error>> {
+fn process(path: &Path, msg: &str) -> Result<(), Box<Error>> {
     let mut font = fig::FIGfont::new();
-    try!(font.load(fontname));
+    try!(font.load(path));
 
     let mut sm = fig::Smusher::new(&font);
     let mut wr = fig::Wrapper::new(&mut sm, 80);

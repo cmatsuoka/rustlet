@@ -5,7 +5,7 @@ use std::error::Error;
 use std::fmt;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::path::PathBuf;
+use std::path::Path;
 
 #[allow(dead_code)] pub const SMUSH_EQUAL    : u32 = 1;
 #[allow(dead_code)] pub const SMUSH_UNDERLINE: u32 = 2;
@@ -46,9 +46,9 @@ impl FIGfont {
         }
     } 
 
-    pub fn load(&mut self, name: &str) -> Result<&Self, Box<Error>> {
+    pub fn load<P: AsRef<Path>>(&mut self, path: P) -> Result<&Self, Box<Error>> {
 
-        let file = try!(File::open(PathBuf::from(name)));
+        let file = try!(File::open(path));
         let mut f = BufReader::new(&file);
 
         let mut line = String::with_capacity(200);
