@@ -1,5 +1,4 @@
 use std::cmp::min;
-use std::error::Error;
 use super::charsmush;
 
 
@@ -30,7 +29,7 @@ pub fn amount(s1: &str, s2: &str, hardblank: char, mode: u32) -> usize {
 }
 
 pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: bool,
-             mode: u32) -> Result<String, Box<Error>> {
+             mode: u32) -> String {
 
     let mut s2 = s2x;
 
@@ -70,7 +69,7 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
         res.push_str(&s1[m2..]);
     }
 
-    Ok(res)
+    res
 }
 
 fn get_pair(s1: &str, s2: &str, amt: usize) -> Option<(char, char)> {
@@ -162,11 +161,11 @@ mod tests {
 
     #[test]
     fn test_smush() {
-        assert_eq!(smush("123! ", "xy", 1, '$', false, 0xbf).ok(), Some("123!xy".to_string()));
-        assert_eq!(smush("123> ", "<y", 2, '$', false, 0xbf).ok(), Some("123Xy".to_string()));
-        assert_eq!(smush("123! ", "   xy", 5, '$', false, 0xbf).ok(), Some("123xy".to_string()));
-        assert_eq!(smush("123/ ", "   /y", 5, '$', false, 0xbf).ok(), Some("123/y".to_string()));
-        assert_eq!(smush("", "   y", 3, '$', false, 0xbf).ok(), Some("y".to_string()));
-        assert_eq!(smush("", "      ", 1, '$', false, 0xbf).ok(), Some("     ".to_string()));
+        assert_eq!(smush("123! ", "xy", 1, '$', false, 0xbf), "123!xy".to_string());
+        assert_eq!(smush("123> ", "<y", 2, '$', false, 0xbf), "123Xy".to_string());
+        assert_eq!(smush("123! ", "   xy", 5, '$', false, 0xbf), "123xy".to_string());
+        assert_eq!(smush("123/ ", "   /y", 5, '$', false, 0xbf), "123/y".to_string());
+        assert_eq!(smush("", "   y", 3, '$', false, 0xbf), "y".to_string());
+        assert_eq!(smush("", "      ", 1, '$', false, 0xbf), "     ".to_string());
     }
 }

@@ -91,14 +91,14 @@ impl<'a> Wrapper<'a> {
         let empty = self.sm.is_empty();
 
         if !empty {
-            try!(self.sm.push(' '));
+            self.sm.push(' ');
         }
-        try!(self.sm.push_str(s));
+        self.sm.push_str(s);
 
         if self.sm.len() > self.width {
             let b = self.buffer.clone();
             self.sm.clear();
-            try!(self.sm.push_str(&b));
+            self.sm.push_str(&b);
             return Err(From::from("line full".to_string()))
         }
 
@@ -116,12 +116,12 @@ impl<'a> Wrapper<'a> {
     /// If adding the character results in a line wider than the maximum number of columns,
     /// the character is not added to the output buffer and an error is returned.
     pub fn push(&mut self, ch: char) -> Result<(), Box<Error>> {
-        try!(self.sm.push(ch));
+        self.sm.push(ch);
 
         if self.sm.len() > self.width {
             let b = self.buffer.clone();
             self.sm.clear();
-            try!(self.sm.push_str(&b));
+            self.sm.push_str(&b);
             return Err(From::from("line full".to_string()))
         }
 
@@ -129,9 +129,8 @@ impl<'a> Wrapper<'a> {
         Ok(())
     }
 
-    pub fn push_nowrap(&mut self, ch: char) -> Result<(), Box<Error>> {
-        try!(self.sm.push(ch));
+    pub fn push_nowrap(&mut self, ch: char) {
+        self.sm.push(ch);
         self.buffer.push(ch);
-        Ok(())
     }
 }

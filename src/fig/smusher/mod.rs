@@ -1,5 +1,4 @@
 use std::cmp::min;
-use std::error::Error;
 pub use super::figfont::{FIGchar, FIGfont};
 pub use super::wrapper::Wrapper;
 
@@ -74,17 +73,15 @@ impl<'a> Smusher<'a> {
         }
     }
 
-    pub fn push_str(&mut self, s: &str) -> Result<(), Box<Error>> {
+    pub fn push_str(&mut self, s: &str) {
         for c in s.chars() {
-            try!(self.push(c));
+            self.push(c);
         }
-        Ok(())
     }
 
-    pub fn push(&mut self, ch: char) -> Result<(), Box<Error>> {
+    pub fn push(&mut self, ch: char) {
         let fc = self.font.get(ch);
-        self.output = try!(smush(&self.output, fc, self.font.hardblank, self.full_width, self.mode));
-        Ok(())
+        self.output = smush(&self.output, fc, self.font.hardblank, self.full_width, self.mode);
     }
 
     pub fn len(&self) -> usize {
@@ -100,7 +97,7 @@ fn amount(output: &Vec<String>, c: &FIGchar, hardblank: char, mode: u32) -> usiz
     amt
 }
 
-fn smush(output: &Vec<String>, fc: &FIGchar, hardblank: char, full_width: bool, mode: u32) -> Result<Vec<String>, Box<Error>> {
+fn smush(output: &Vec<String>, fc: &FIGchar, hardblank: char, full_width: bool, mode: u32) -> Vec<String> {
 
     let amt = match full_width {
         true  => 0,
@@ -110,10 +107,10 @@ fn smush(output: &Vec<String>, fc: &FIGchar, hardblank: char, full_width: bool, 
     let mut res = Vec::new();
 
     for i in 0..output.len() {
-        res.push(strsmush::smush(&output[i], &fc.lines[i], amt, hardblank, false, mode)?);
+        res.push(strsmush::smush(&output[i], &fc.lines[i], amt, hardblank, false, mode));
     }
 
-    Ok(res)
+    res
 }
 
 #[cfg(test)]
