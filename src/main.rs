@@ -7,8 +7,9 @@ use std::error::Error;
 use std::path::{self, Path, PathBuf};
 use getopts::{Matches, Options};
 
-const FONT_DIR    : &'static str = "/usr/share/figlet";
-const DEFAULT_FONT: &'static str = "standard.flf";
+const FONT_DIR     : &'static str = "/usr/share/figlet";
+const DEFAULT_FONT : &'static str = "standard.flf";
+const DEFAULT_WIDTH: usize = 80;
 
 
 fn main() {
@@ -87,7 +88,12 @@ fn process(path: &Path, msg: &str, matches: &Matches) -> Result<(), Box<Error>> 
         sm.full_width = true;
     }
 
-    let mut wr = fig::Wrapper::new(&mut sm, 80);
+    let width = match matches.opt_str("w") {
+        Some(s) => try!(s.parse::<usize>()),
+        None    => DEFAULT_WIDTH,
+    };
+
+    let mut wr = fig::Wrapper::new(&mut sm, width);
 
     if msg.len() > 0 {
         // read message from command line parameters
