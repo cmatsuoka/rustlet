@@ -1,6 +1,12 @@
 use std::error::Error;
 use super::Smusher;
 
+enum Align {
+    Left,
+    Right,
+    Center,
+}
+
 /// Render smushed ASCII-art characters with word wrapping.
 ///
 /// Wrapper receives string or character input and renders the corresponding
@@ -42,6 +48,10 @@ impl<'a> Wrapper<'a> {
     pub fn clear(&mut self) {
         self.sm.clear();
         self.buffer.clear();
+    }
+
+    pub fn smush_mode(&mut self, mode: u32) {
+        self.sm.mode = mode;
     }
 
     /// Retrieve the output buffer lines.

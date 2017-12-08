@@ -5,10 +5,11 @@ use std::env;
 use std::io::{self, BufRead};
 use std::error::Error;
 use std::path::{self, Path, PathBuf};
-use getopts::Options;
+use getopts::{Matches, Options};
 
 const FONT_DIR    : &'static str = "/usr/share/figlet";
 const DEFAULT_FONT: &'static str = "standard.flf";
+
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -51,7 +52,7 @@ fn main() {
     }
 
     let msg = matches.free.join(" ");
-    match process(&fontpath, &msg) {
+    match process(&fontpath, &msg, &matches) {
         Err(e) => { println!("Error: {}", e) }
         Ok(_)  => {},
     }
@@ -74,12 +75,16 @@ fn find_font(mut fontpath: PathBuf, mut name: String) -> PathBuf {
     PathBuf::from(&name)
 }
 
-fn process(path: &Path, msg: &str) -> Result<(), Box<Error>> {
+fn process(path: &Path, msg: &str, matches: &Matches) -> Result<(), Box<Error>> {
     let mut font = fig::FIGfont::new();
     try!(font.load(path));
 
     let mut sm = fig::Smusher::new(&font);
     let mut wr = fig::Wrapper::new(&mut sm, 80);
+
+    if matches.opt_present("k") {
+        wr.smush_mode(fig::SMUSH_KERN);
+    }
 
     if msg.len() > 0 {
         // read message from command line parameters
