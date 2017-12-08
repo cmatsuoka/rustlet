@@ -102,6 +102,7 @@ impl FIGfont {
     }
 }
 
+
 #[derive(Debug)]
 pub struct FIGchar {
     pub lines: Vec<String>,
@@ -135,8 +136,8 @@ impl fmt::Display for FIGchar {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut s = String::new();
         for l in &self.lines {
-            s += &l;
-            s += &"\n";
+            s += l;
+            s += "\n";
         }
         write!(f, "{}", s)
     }
