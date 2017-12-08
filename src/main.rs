@@ -6,6 +6,7 @@ use std::io::{self, BufRead};
 use std::error::Error;
 use std::path::{self, Path, PathBuf};
 use getopts::{Matches, Options};
+use fig::wrapper::Align;
 
 const FONT_DIR     : &'static str = "/usr/share/figlet";
 const DEFAULT_FONT : &'static str = "standard.flf";
@@ -94,6 +95,12 @@ fn process(path: &Path, msg: &str, matches: &Matches) -> Result<(), Box<Error>> 
     };
 
     let mut wr = fig::Wrapper::new(&mut sm, width);
+
+    if matches.opt_present("c") {
+        wr.align = Align::Center;
+    } else if matches.opt_present("r") {
+        wr.align = Align::Right;
+    }
 
     if msg.len() > 0 {
         // read message from command line parameters

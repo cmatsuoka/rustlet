@@ -1,7 +1,7 @@
 use std::error::Error;
 use super::Smusher;
 
-enum Align {
+pub enum Align {
     Left,
     Right,
     Center,
@@ -16,6 +16,7 @@ pub struct Wrapper<'a> {
     sm        : &'a mut Smusher<'a>,
     pub buffer: String,
     pub width : usize,
+    pub align : Align,
 }
 
 impl<'a> Wrapper<'a> {
@@ -41,6 +42,7 @@ impl<'a> Wrapper<'a> {
            sm,
            width,
            buffer: String::new(),
+           align : Align::Left,
         }
     }
 
@@ -49,6 +51,7 @@ impl<'a> Wrapper<'a> {
         self.sm.clear();
         self.buffer.clear();
     }
+
 
     /// Retrieve the output buffer lines.
     ///
@@ -73,7 +76,14 @@ impl<'a> Wrapper<'a> {
     /// # }
     /// ```
     pub fn get(&self) -> Vec<String> {
-        self.sm.get()
+        let l = self.width - self.len();
+        let v = self.sm.get();
+
+        match self.align {
+            Align::Left   => v,
+            Align::Center => align_center(v, l),
+            Align::Right  => align_right(v, l),
+        }
     }
 
     /// Get the length in sub-characters of the current output buffer.
@@ -132,5 +142,36 @@ impl<'a> Wrapper<'a> {
     pub fn push_nowrap(&mut self, ch: char) {
         self.sm.push(ch);
         self.buffer.push(ch);
+    }
+}
+
+fn pad(num: usize) -> String {
+    (0..num).map(|_| " ").collect::<String>()
+}
+
+fn align_center(v: Vec<String>, width: usize) -> Vec<String> {
+    v.iter().map(|x| pad((width - 1) / 2) + x).collect()
+}
+
+fn align_right(v: Vec<String>, width: usize) -> Vec<String> {
+    v.iter().map(|x| pad(width - 1) + x).collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    macro_rules! vec_of_strings {
+        ( $($x:expr),* ) => (vec![$($x.to_string()),*])
+    }
+
+    #[test]
+    fn test_align_center() {
+        assert_eq!(align_center(vec_of_strings!("x", "x"), 5), vec_of_strings!("  x", "  x"));
+    }
+
+    #[test]
+    fn test_align_right() {
+        assert_eq!(align_right(vec_of_strings!("x", "x"), 5), vec_of_strings!("    x", "    x"));
     }
 }
