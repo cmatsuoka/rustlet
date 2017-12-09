@@ -119,38 +119,13 @@ fn process(path: &Path, msg: &str, matches: &Matches) -> Result<(), Box<Error>> 
 fn write_line(wr: &mut fig::Wrapper, s: &str) {
     wr.clear();
     for word in s.split_whitespace() {
-        match wr.push_str(word) {
-            Ok(_)  => {},
-            Err(_) => {
-                print_output(&wr);
-                wr.clear();
-                match wr.push_str(word) {
-                    Ok(_)  => {},
-                    Err(_) => write_word(wr, word),
-                }
-            }
-        }
+        wr.wrap_str(word, &print_output);
     }
-    print_output(&wr);
+    print_output(&wr.get());
 }
 
-fn write_word(wr: &mut fig::Wrapper, word: &str) {
-    for c in word.chars() {
-        match wr.push(c) {
-            Ok(_)  => {},
-            Err(_) => {
-                if !wr.buffer.is_empty() {
-                    print_output(&wr);
-                    wr.clear();
-                }
-                wr.push_nowrap(c);
-            }
-        }
-    }
-}
-
-fn print_output(wr: &fig::Wrapper) {
-    for line in &wr.get() {
+fn print_output(v: &Vec<String>) {
+    for line in v {
         println!("{}", line);
     }
 }

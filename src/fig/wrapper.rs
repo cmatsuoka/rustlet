@@ -143,6 +143,35 @@ impl<'a> Wrapper<'a> {
         self.sm.push(ch);
         self.buffer.push(ch);
     }
+
+    pub fn wrap_str(&mut self, s: &str, flush: &Fn(&Vec<String>)) {
+        match self.push_str(s) {
+            Ok(_)  => {},
+            Err(_) => {
+                flush(&self.get());
+                self.clear();
+                match self.push_str(s) {
+                    Ok(_)  => {},
+                    Err(_) => self.wrap(s, flush),
+                }
+            }
+        }
+    }
+    
+    fn wrap(&mut self, word: &str, flush: &Fn(&Vec<String>)) {
+        for c in word.chars() {
+            match self.push(c) {
+                Ok(_)  => {},
+                Err(_) => {
+                    if !self.buffer.is_empty() {
+                        flush(&self.get());
+                        self.clear();
+                    }
+                    self.push_nowrap(c);
+                }
+            }
+        }
+    }
 }
 
 fn pad(num: usize) -> String {
