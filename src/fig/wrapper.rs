@@ -76,13 +76,13 @@ impl<'a> Wrapper<'a> {
     /// # }
     /// ```
     pub fn get(&self) -> Vec<String> {
-        let l = self.width - self.len();
+        let w = self.width - self.len();
         let v = self.sm.get();
 
         match self.align {
             Align::Left   => v,
-            Align::Center => align_center(v, l),
-            Align::Right  => align_right(v, l),
+            Align::Center => align_center(v, w),
+            Align::Right  => align_right(v, w),
         }
     }
 
