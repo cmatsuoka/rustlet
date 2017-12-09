@@ -32,22 +32,25 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
              mode: u32) -> String {
 
     let mut s2 = s2x;
+    let l1 = s1.chars().count();
 
-    if amt > s1.len() {
-        s2 = &s2[amt - s1.len()..];
-        amt = s1.len();
+    if amt > l1 {
+        s2 = &s2[s2.char_indices().nth(amt-l1).unwrap().0..];
+        amt = l1;
     }
 
+    let l2 = s2.chars().count();
     let mut res = "".to_string();
-    let m1 = s1.len() - amt;
+    let m1 = l1 - amt;
 
     // part 1: only characters from s1
-    for c in s1[..m1].chars() {
-        res.push(c);
+    // don't use the index operator, we want characters not bytes
+    for i in 0..m1 {
+        res.push(s1.chars().nth(i).unwrap());
     }
 
     // part 2: s1 and s2 overlap
-    for i in 0..s2.len() {
+    for i in 0..l2 {
         let l = match s1.chars().nth(m1 + i) {
             Some(v) => v,
             None    => ' ',
@@ -64,9 +67,10 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
     }
 
     // part 3: remainder of s1 after the end of s2
-    let m2 = m1 + s2.len();
-    if s1.len() > m2 {
-        res.push_str(&s1[m2..]);
+    // don't use the index operator, we want characters not bytes
+    let m2 = m1 + l2;
+    for i in m2..l1 {
+        res.push(s1.chars().nth(i).unwrap());
     }
 
     res
@@ -167,5 +171,10 @@ mod tests {
         assert_eq!(smush("123/ ", "   /y", 5, '$', false, 0xbf), "123/y".to_string());
         assert_eq!(smush("", "   y", 3, '$', false, 0xbf), "y".to_string());
         assert_eq!(smush("", "      ", 1, '$', false, 0xbf), "     ".to_string());
+    }
+
+    #[test]
+    fn test_smush_utf8() {
+        assert_eq!(smush("áéí! ", "óú", 1, '$', false, 0xbf), "áéí!óú".to_string());
     }
 }
