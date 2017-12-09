@@ -28,25 +28,45 @@ pub fn amount(s1: &str, s2: &str, hardblank: char, mode: u32) -> usize {
     }
 }
 
+trait CharExt {
+    fn char_len(&self) -> usize;
+    fn char_nth(&self, usize) -> char;
+    fn char_index(&self, usize) -> usize;
+}
+
+impl<'a> CharExt for &'a str {
+    fn char_len(&self) -> usize {
+        self.chars().count()
+    }
+
+    fn char_nth(&self, i: usize) -> char {
+        self.chars().nth(i).unwrap()
+    }
+
+    fn char_index(&self, i: usize) -> usize {
+        self.char_indices().nth(i).unwrap().0
+    }
+}
+
 pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: bool,
              mode: u32) -> String {
 
     let mut s2 = s2x;
-    let l1 = s1.chars().count();
+    let l1 = s1.char_len();
 
     if amt > l1 {
-        s2 = &s2[s2.char_indices().nth(amt-l1).unwrap().0..];
+        s2 = &s2[s2.char_index(amt-l1)..];
         amt = l1;
     }
 
-    let l2 = s2.chars().count();
+    let l2 = s2.char_len();
     let mut res = "".to_string();
     let m1 = l1 - amt;
 
     // part 1: only characters from s1
     // don't use the index operator, we want characters not bytes
     for i in 0..m1 {
-        res.push(s1.chars().nth(i).unwrap());
+        res.push(s1.char_nth(i));
     }
 
     // part 2: s1 and s2 overlap
@@ -55,7 +75,7 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
             Some(v) => v,
             None    => ' ',
         };
-        let r = s2.chars().nth(i).unwrap();
+        let r = s2.char_nth(i);
         if l != ' ' && r != ' ' {
             match charsmush::smush(l, r, hardblank, false, mode) {
                 Some(c) => res.push(c),
@@ -70,7 +90,7 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
     // don't use the index operator, we want characters not bytes
     let m2 = m1 + l2;
     for i in m2..l1 {
-        res.push(s1.chars().nth(i).unwrap());
+        res.push(s1.char_nth(i));
     }
 
     res
@@ -176,5 +196,6 @@ mod tests {
     #[test]
     fn test_smush_utf8() {
         assert_eq!(smush("áéí! ", "óú", 1, '$', false, 0xbf), "áéí!óú".to_string());
+        assert_eq!(smush("", "   á", 3, '$', false, 0xbf), "á".to_string());
     }
 }
