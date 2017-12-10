@@ -78,14 +78,11 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
     // part 1: only characters from s1
     // don't use the index operator, we want characters not bytes
     let mut v1 = s1.chars();
-    for _ in 0..m1 {
-        res.push(v1.next().unwrap());
-    }
-    //s1.char_range(0, m1, |x| res.push(x));
+    (0..m1).for_each(|_| res.push(v1.next().unwrap()));
 
     // part 2: s1 and s2 overlap
     let mut v2 = s2.chars();
-    for _ in 0..l2 {
+    (0..l2).for_each(|_| {
         let l = match v1.next() {
             Some(v) => v,
             None    => ' ',
@@ -99,15 +96,12 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
         } else {
             res.push(if l == ' ' { r } else { l });
         }
-    }
+    });
 
     // part 3: remainder of s1 after the end of s2
     // don't use the index operator, we want characters not bytes
     let m2 = m1 + l2;
-    for _ in m2..l1 {
-        res.push(v1.next().unwrap());
-    }
-    //s1.char_range(m2, l1, |x| res.push(x));
+    (m2..l1).for_each(|_| res.push(v1.next().unwrap()));
 
     res
 }
