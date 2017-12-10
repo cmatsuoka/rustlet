@@ -85,8 +85,8 @@ impl<'a> Wrapper<'a> {
 
         match self.align {
             Align::Left   => v,
-            Align::Center => align_center(v, w),
-            Align::Right  => align_right(v, w),
+            Align::Center => add_pad(v, w / 2),
+            Align::Right  => add_pad(v, w),
         }
     }
 
@@ -180,33 +180,25 @@ impl<'a> Wrapper<'a> {
     }
 }
 
-fn pad(num: usize) -> String {
-    (0..num).map(|_| " ").collect::<String>()
-}
 
-fn align_center(v: Vec<String>, width: usize) -> Vec<String> {
-    v.iter().map(|x| pad(width / 2) + x).collect()
-}
-
-fn align_right(v: Vec<String>, width: usize) -> Vec<String> {
-    v.iter().map(|x| pad(width) + x).collect()
+fn add_pad(v: Vec<String>, pad_size: usize) -> Vec<String> {
+    fn pad(num: usize) -> String {
+        (0..num).map(|_| " ").collect::<String>()
+    }
+    v.iter().map(|x| pad(pad_size) + x).collect()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    macro_rules! vec_of_strings {
+    macro_rules! vec_string {
         ( $($x:expr),* ) => (vec![$($x.to_string()),*])
     }
 
     #[test]
-    fn test_align_center() {
-        assert_eq!(align_center(vec_of_strings!("x", "x"), 5), vec_of_strings!("  x", "  x"));
-    }
-
-    #[test]
-    fn test_align_right() {
-        assert_eq!(align_right(vec_of_strings!("x", "x"), 5), vec_of_strings!("    x", "    x"));
+    fn test_padding() {
+        assert_eq!(add_pad(vec_string!("x", "x"), 0), vec_string!("x", "x"));
+        assert_eq!(add_pad(vec_string!("x", "x"), 4), vec_string!("    x", "    x"));
     }
 }
