@@ -1,13 +1,8 @@
-use std::cmp::min;
 use super::charsmush;
-
 
 pub trait CharExt {
     fn char_len(&self) -> usize;
-    fn char_nth(&self, usize) -> char;
     fn char_index(&self, usize) -> usize;
-    fn char_find<F: Fn(char) -> bool>(&self, F) -> usize;
-    fn char_rfind<F: Fn(char) -> bool>(&self, F) -> usize;
 }
 
 impl<'a> CharExt for &'a str {
@@ -15,51 +10,48 @@ impl<'a> CharExt for &'a str {
         self.chars().count()
     }
 
-    fn char_nth(&self, i: usize) -> char {
-        self.chars().nth(i).unwrap()
-    }
-
     fn char_index(&self, i: usize) -> usize {
         self.char_indices().nth(i).unwrap().0
-    }
-
-    fn char_find<F: Fn(char) -> bool>(&self, f: F) -> usize {
-        let mut n = 0;
-        for c in self.chars() {
-            if f(c) {
-                break
-            }
-            n += 1;
-        }
-        n 
-    }
-
-    fn char_rfind<F: Fn(char) -> bool>(&self, f: F) -> usize {
-        let mut n = 0;
-        for c in self.chars().rev() {
-            if f(c) {
-                break
-            }
-            n += 1;
-        }
-        n 
     }
 }
 
 // Compute the number of characters a string can be smushed into another string.
 pub fn amount(s1: &str, s2: &str, hardblank: char, mode: u32) -> usize {
 
-    let a1 = s1.char_rfind(|x| !x.is_whitespace());
-    let a2 = s2.char_find(|x| !x.is_whitespace());
-    let amt = a1 + a2;
+    let mut v1 = s1.chars().rev();
+    let mut v2 = s2.chars();
+    let mut amt = 0;
+       
+    let mut l = ' ';
+    if !s1.is_empty() {
+        l = v1.next().unwrap();
+        while l.is_whitespace() {
+            amt += 1;
+            l = match v1.next() {
+                Some(val) => val,
+                None      => break,
+            };
+        }
+    }
 
-    // Retrieve character pair and see if they're smushable
-    let (l, r) = match get_pair(s1, s2, amt + 1) {
-        Some(pair) => pair,
-        None       => { return amt; }
-    };
+    let mut r = ' ';
+    if !s2.is_empty() {
+        r = v2.next().unwrap();
+        while r.is_whitespace() {
+            amt += 1;
+            r = match v2.next() {
+                Some(val) => val,
+                None      => break,
+            };
+        }
+    }
+
+    if l == ' ' || r == ' ' {
+        return amt;
+    }
+
     match charsmush::smush(l, r, hardblank, false, mode) {
-        Some(_) => { amt + 1 },
+        Some(_) => { amt + 1},
         None    => { amt },
     }
 }
@@ -93,7 +85,7 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
 
     // part 2: s1 and s2 overlap
     let mut v2 = s2.chars();
-    for i in 0..l2 {
+    for _ in 0..l2 {
         let l = match v1.next() {
             Some(v) => v,
             None    => ' ',
@@ -105,7 +97,7 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
                 None    => res.push(r),
             }
         } else {
-            res.push(match l { ' ' => r, _ => l });
+            res.push(if l == ' ' { r } else { l });
         }
     }
 
@@ -120,31 +112,6 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
     res
 }
 
-fn get_pair(s1: &str, s2: &str, amt: usize) -> Option<(char, char)> {
-    let len1 = s1.char_len();
-    let len2 = s2.char_len();
-
-    if len1 == 0 || len2 == 0 {
-        return None;
-    }
-
-    let overlap = min(amt, len2);
-
-    for i in (0..overlap).rev() {
-        if len1 + i < amt {
-            return None;
-        }
-        let l = s1.char_nth(len1 + i - amt);
-        let r = s2.char_nth(i);
-        if l != ' ' && r != ' ' {
-            return Some((l, r));
-        }
-    }
-
-    None
-}
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -153,27 +120,6 @@ mod tests {
     fn test_char_len() {
         assert_eq!("aeiou".char_len(), 5);
         assert_eq!("áéíóú".char_len(), 5);
-    }
-
-    #[test]
-    fn test_char_nth() {
-        assert_eq!("aeiou".char_nth(2), 'i');
-        assert_eq!("áéíóú".char_nth(2), 'í');
-        // FIXME: handle error
-        //assert_eq!("áéíóú".char_nth(5), 'í');
-    }
-    
-    #[test]
-    fn test_get_pair() {
-        assert_eq!(get_pair("    ", "    ", 2), None);
-        assert_eq!(get_pair("abc ", " xyz", 1), None);
-        assert_eq!(get_pair("abc ", " xyz", 2), None);
-        assert_eq!(get_pair("abc ", " xyz", 3), Some(('c', 'x')));
-        assert_eq!(get_pair("abc   ", " x", 5), Some(('c', 'x')));
-        assert_eq!(get_pair("a ", " xyzwt", 3), Some(('a', 'x')));
-        assert_eq!(get_pair("a", "      x", 6), None);
-        assert_eq!(get_pair("a", "      x", 7), Some(('a', 'x')));
-        assert_eq!(get_pair("", "       x", 7), None);
     }
 
     #[test]
