@@ -107,9 +107,7 @@ fn process(path: &Path, msg: &str, matches: &Matches) -> Result<(), Box<Error>> 
     } else {
         // read message from stdin
         let input = io::BufReader::new(io::stdin());
-        for line in input.lines() {
-            write_line(&mut wr, &line.unwrap())
-        }
+        input.lines().for_each(|x| write_line(&mut wr, &x.unwrap()));
     }
 
     Ok(())
@@ -117,14 +115,10 @@ fn process(path: &Path, msg: &str, matches: &Matches) -> Result<(), Box<Error>> 
 
 fn write_line(wr: &mut fig::Wrapper, s: &str) {
     wr.clear();
-    for word in s.split_whitespace() {
-        wr.wrap_str(word, &print_output);
-    }
+    s.split_whitespace().for_each(|x| wr.wrap_str(x, &print_output));
     print_output(&wr.get());
 }
 
 fn print_output(v: &Vec<String>) {
-    for line in v {
-        println!("{}", line);
-    }
+    v.iter().for_each(|x| println!("{}", x));
 }

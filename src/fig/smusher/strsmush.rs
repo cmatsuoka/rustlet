@@ -8,6 +8,7 @@ pub trait CharExt {
     fn char_index(&self, usize) -> usize;
     fn char_find<F: Fn(char) -> bool>(&self, F) -> usize;
     fn char_rfind<F: Fn(char) -> bool>(&self, F) -> usize;
+    fn char_range<F: FnMut(char)>(&self, usize, usize, F);
 }
 
 impl<'a> CharExt for &'a str {
@@ -43,6 +44,16 @@ impl<'a> CharExt for &'a str {
             n += 1;
         }
         n 
+    }
+
+    fn char_range<F: FnMut(char)>(&self, a: usize, b: usize, mut f: F) {
+        if b > a {
+            let mut v = self.chars();
+            f(v.nth(a).unwrap());
+            for _ in a+1..b {
+                f(v.next().unwrap());
+            }
+        }
     }
 }
 
@@ -81,9 +92,7 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
 
     // part 1: only characters from s1
     // don't use the index operator, we want characters not bytes
-    for i in 0..m1 {
-        res.push(s1.char_nth(i));
-    }
+    s1.char_range(0, m1, |x| res.push(x));
 
     // part 2: s1 and s2 overlap
     for i in 0..l2 {
@@ -105,9 +114,7 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
     // part 3: remainder of s1 after the end of s2
     // don't use the index operator, we want characters not bytes
     let m2 = m1 + l2;
-    for i in m2..l1 {
-        res.push(s1.char_nth(i));
-    }
+    s1.char_range(m2, l1, |x| res.push(x));
 
     res
 }

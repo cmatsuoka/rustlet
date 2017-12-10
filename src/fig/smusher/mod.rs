@@ -62,22 +62,15 @@ impl<'a> Smusher<'a> {
     }
 
     pub fn is_empty(&self) -> bool {
-        if self.output.len() == 0 {
-            return true;
-        }
-        self.output[0].is_empty()
+        self.output.len() == 0 || self.output[0].is_empty()
     }
 
     pub fn clear(&mut self) {
-        for i in 0..self.output.len() {
-            self.output[i].clear();
-        }
+        self.output.iter_mut().for_each(|x| x.clear());
     }
 
     pub fn push_str(&mut self, s: &str) {
-        for c in s.chars() {
-            self.push(c);
-        }
+        s.chars().for_each(|x| self.push(x));
     }
 
     pub fn push(&mut self, ch: char) {
