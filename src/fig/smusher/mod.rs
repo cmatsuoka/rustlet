@@ -93,23 +93,23 @@ impl<'a> Smusher<'a> {
 
 fn amount(output: &Vec<String>, c: &FIGchar, hardblank: char, mode: u32) -> usize {
     let mut amt = 9999;
-    for i in 0..output.len() {
-        amt = min(amt, strsmush::amount(&output[i], &c.lines[i], hardblank, mode));
+    for (line, cline) in output.iter().zip(&c.lines) {
+        amt = min(amt, strsmush::amount(&line, &cline, hardblank, mode));
     }
     amt
 }
 
-fn smush(output: &Vec<String>, fc: &FIGchar, hardblank: char, full_width: bool, mode: u32) -> Vec<String> {
+fn smush(output: &Vec<String>, c: &FIGchar, hardblank: char, full_width: bool, mode: u32) -> Vec<String> {
 
     let amt = match full_width {
         true  => 0,
-        false => amount(&output, fc, hardblank, mode),
+        false => amount(&output, c, hardblank, mode),
     };
 
     let mut res = Vec::new();
 
-    for i in 0..output.len() {
-        res.push(strsmush::smush(&output[i], &fc.lines[i], amt, hardblank, false, mode));
+    for (line, cline) in output.iter().zip(&c.lines) {
+        res.push(strsmush::smush(&line, &cline, amt, hardblank, false, mode));
     }
 
     res
