@@ -60,7 +60,7 @@ fn main() {
 }
 
 fn find_font(mut fontpath: PathBuf, mut name: String) -> PathBuf {
-    if !name.ends_with(".flf") {
+    if !name.ends_with(".flf") && !name.ends_with(".tlf") {
         name = format!("{}.flf", name);
     }
 

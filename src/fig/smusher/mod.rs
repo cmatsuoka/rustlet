@@ -79,7 +79,8 @@ impl<'a> Smusher<'a> {
     }
 
     pub fn len(&self) -> usize {
-        self.output[0].len()
+        let s: &str = &self.output[0];
+        s.char_len()
     }
 
     pub fn trim(&mut self, width: usize) {

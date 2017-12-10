@@ -79,7 +79,7 @@ impl FIGfont {
 
     pub fn parse_header(&mut self, line: &String) -> Result<&Self, Box<Error>> {
 
-        if !line.starts_with("flf2") {
+        if !line.starts_with("flf2") && !line.starts_with("tlf2") {
             return Err(From::from(ERR_INVALID.to_string()));
         }
 

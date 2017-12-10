@@ -133,7 +133,7 @@ mod tests {
         assert_eq!(amount("x   ", "    ", '$', 0xbf), 7);
         assert_eq!(amount("xx  ", "    ", '$', 0xbf), 6);
         assert_eq!(amount("xxx ", "    ", '$', 0xbf), 5);
-        assert_eq!(amount("XXXX", "    ", '$', 0xbf), 4);
+        assert_eq!(amount("xxxx", "    ", '$', 0xbf), 4);
 
         assert_eq!(amount("    ", "   y", '$', 0xbf), 7);
         assert_eq!(amount("x   ", "   y", '$', 0xbf), 6);
