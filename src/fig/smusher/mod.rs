@@ -1,9 +1,10 @@
 use std::cmp::min;
 pub use super::figfont::{FIGchar, FIGfont};
 pub use super::wrapper::Wrapper;
+pub use super::CharExt;
 
 mod charsmush;
-mod strsmush;
+pub mod strsmush;
 
 /// Creates a message written with ASCII-art characters.
 ///
@@ -86,6 +87,13 @@ impl<'a> Smusher<'a> {
 
     pub fn len(&self) -> usize {
         self.output[0].len()
+    }
+
+    pub fn trim(&mut self, width: usize) {
+        self.output = self.output.iter().map(|line| {
+            let s: &str = &line;
+            s[..s.char_index(width)].to_string()
+        }).collect()
     }
 }
 

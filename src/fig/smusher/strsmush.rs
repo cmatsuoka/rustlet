@@ -28,7 +28,7 @@ pub fn amount(s1: &str, s2: &str, hardblank: char, mode: u32) -> usize {
     }
 }
 
-trait CharExt {
+pub trait CharExt {
     fn char_len(&self) -> usize;
     fn char_nth(&self, usize) -> char;
     fn char_index(&self, usize) -> usize;

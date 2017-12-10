@@ -75,7 +75,11 @@ impl<'a> Wrapper<'a> {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn get(&self) -> Vec<String> {
+    pub fn get(&mut self) -> Vec<String> {
+        if self.len() > self.width {
+            self.sm.trim(self.width);
+        }
+
         let w = self.width - self.len();
         let v = self.sm.get();
 
@@ -148,8 +152,10 @@ impl<'a> Wrapper<'a> {
         match self.push_str(s) {
             Ok(_)  => {},
             Err(_) => {
-                flush(&self.get());
-                self.clear();
+                if !self.buffer.is_empty() {
+                    flush(&self.get());
+                    self.clear();
+                }
                 match self.push_str(s) {
                     Ok(_)  => {},
                     Err(_) => self.wrap(s, flush),
