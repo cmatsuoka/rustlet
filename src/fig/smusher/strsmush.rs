@@ -2,36 +2,12 @@ use std::cmp::min;
 use super::charsmush;
 
 
-// Compute the number of characters a string can be smushed into another string.
-pub fn amount(s1: &str, s2: &str, hardblank: char, mode: u32) -> usize {
-
-    let a1 = s1.len() - match s1.rfind(|x| { let y:char = x; !y.is_whitespace() }) {
-        Some(val) => val + 1,
-        None      => 0,
-    };
-
-    let a2 = match s2.find(|x| { let y:char = x; !y.is_whitespace() }) {
-        Some(val) => val,
-        None      => s2.len(),
-    };
-
-    let amt = a1 + a2;
-
-    // Retrieve character pair and see if they're smushable
-    let (l, r) = match get_pair(s1, s2, amt + 1) {
-        Some(pair) => pair,
-        None       => { return amt; }
-    };
-    match charsmush::smush(l, r, hardblank, false, mode) {
-        Some(_) => { amt + 1 },
-        None    => { amt },
-    }
-}
-
 pub trait CharExt {
     fn char_len(&self) -> usize;
     fn char_nth(&self, usize) -> char;
     fn char_index(&self, usize) -> usize;
+    fn char_find<F: Fn(char) -> bool>(&self, F) -> usize;
+    fn char_rfind<F: Fn(char) -> bool>(&self, F) -> usize;
 }
 
 impl<'a> CharExt for &'a str {
@@ -45,6 +21,46 @@ impl<'a> CharExt for &'a str {
 
     fn char_index(&self, i: usize) -> usize {
         self.char_indices().nth(i).unwrap().0
+    }
+
+    fn char_find<F: Fn(char) -> bool>(&self, f: F) -> usize {
+        let mut n = 0;
+        for c in self.chars() {
+            if f(c) {
+                break
+            }
+            n += 1;
+        }
+        n 
+    }
+
+    fn char_rfind<F: Fn(char) -> bool>(&self, f: F) -> usize {
+        let mut n = 0;
+        for c in self.chars().rev() {
+            if f(c) {
+                break
+            }
+            n += 1;
+        }
+        n 
+    }
+}
+
+// Compute the number of characters a string can be smushed into another string.
+pub fn amount(s1: &str, s2: &str, hardblank: char, mode: u32) -> usize {
+
+    let a1 = s1.char_rfind(|x| !x.is_whitespace());
+    let a2 = s2.char_find(|x| !x.is_whitespace());
+    let amt = a1 + a2;
+
+    // Retrieve character pair and see if they're smushable
+    let (l, r) = match get_pair(s1, s2, amt + 1) {
+        Some(pair) => pair,
+        None       => { return amt; }
+    };
+    match charsmush::smush(l, r, hardblank, false, mode) {
+        Some(_) => { amt + 1 },
+        None    => { amt },
     }
 }
 
@@ -97,18 +113,21 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
 }
 
 fn get_pair(s1: &str, s2: &str, amt: usize) -> Option<(char, char)> {
-    if s1.len() == 0 || s2.len() == 0 {
+    let len1 = s1.char_len();
+    let len2 = s2.char_len();
+
+    if len1 == 0 || len2 == 0 {
         return None;
     }
 
-    let overlap = min(amt, s2.len());
+    let overlap = min(amt, len2);
 
     for i in (0..overlap).rev() {
-        if s1.len() + i < amt {
+        if len1 + i < amt {
             return None;
         }
-        let l = s1.chars().nth(s1.len() + i - amt).unwrap();
-        let r = s2.chars().nth(i).unwrap();
+        let l = s1.char_nth(len1 + i - amt);
+        let r = s2.char_nth(i);
         if l != ' ' && r != ' ' {
             return Some((l, r));
         }
@@ -122,6 +141,20 @@ fn get_pair(s1: &str, s2: &str, amt: usize) -> Option<(char, char)> {
 mod tests {
     use super::*;
 
+    #[test]
+    fn test_char_len() {
+        assert_eq!("aeiou".char_len(), 5);
+        assert_eq!("áéíóú".char_len(), 5);
+    }
+
+    #[test]
+    fn test_char_nth() {
+        assert_eq!("aeiou".char_nth(2), 'i');
+        assert_eq!("áéíóú".char_nth(2), 'í');
+        // FIXME: handle error
+        //assert_eq!("áéíóú".char_nth(5), 'í');
+    }
+    
     #[test]
     fn test_get_pair() {
         assert_eq!(get_pair("    ", "    ", 2), None);
@@ -181,6 +214,17 @@ mod tests {
         assert_eq!(amount("[", "]", '$', 0xbf), 1);     // rule 4
         assert_eq!(amount(">", "<", '$', 0xbf), 1);     // rule 5
         assert_eq!(amount("[ ", " {", '$', 0xbf), 3);   // rule 3 + spacing
+    }
+
+    #[test]
+    fn test_amount_utf8() {
+        assert_eq!(amount("", "   é", '$', 0xbf), 3);
+        assert_eq!(amount("á   ", "    ", '$', 0xbf), 7);
+        assert_eq!(amount("áá  ", "    ", '$', 0xbf), 6);
+        assert_eq!(amount("á   ", "   é", '$', 0xbf), 6);
+        assert_eq!(amount("áá  ", "   é", '$', 0xbf), 5);
+        assert_eq!(amount("á   ", "  éé", '$', 0xbf), 5);
+        assert_eq!(amount("áá  ", "  éé", '$', 0xbf), 4);
     }
 
     #[test]

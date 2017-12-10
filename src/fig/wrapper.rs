@@ -201,4 +201,10 @@ mod tests {
         assert_eq!(add_pad(vec_string!("x", "x"), 0), vec_string!("x", "x"));
         assert_eq!(add_pad(vec_string!("x", "x"), 4), vec_string!("    x", "    x"));
     }
+
+    #[test]
+    fn test_padding_utf8() {
+        assert_eq!(add_pad(vec_string!("á", "á"), 0), vec_string!("á", "á"));
+        assert_eq!(add_pad(vec_string!("á", "á"), 4), vec_string!("    á", "    á"));
+    }
 }
