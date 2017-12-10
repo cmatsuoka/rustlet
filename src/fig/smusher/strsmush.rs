@@ -8,7 +8,6 @@ pub trait CharExt {
     fn char_index(&self, usize) -> usize;
     fn char_find<F: Fn(char) -> bool>(&self, F) -> usize;
     fn char_rfind<F: Fn(char) -> bool>(&self, F) -> usize;
-    fn char_range<F: FnMut(char)>(&self, usize, usize, F);
 }
 
 impl<'a> CharExt for &'a str {
@@ -45,16 +44,6 @@ impl<'a> CharExt for &'a str {
         }
         n 
     }
-
-    fn char_range<F: FnMut(char)>(&self, a: usize, b: usize, mut f: F) {
-        if b > a {
-            let mut v = self.chars();
-            f(v.nth(a).unwrap());
-            for _ in a+1..b {
-                f(v.next().unwrap());
-            }
-        }
-    }
 }
 
 // Compute the number of characters a string can be smushed into another string.
@@ -78,6 +67,10 @@ pub fn amount(s1: &str, s2: &str, hardblank: char, mode: u32) -> usize {
 pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: bool,
              mode: u32) -> String {
 
+    if s2x.is_empty() {
+        return s1.to_string();
+    }
+
     let mut s2 = s2x;
     let l1 = s1.char_len();
 
@@ -92,15 +85,20 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
 
     // part 1: only characters from s1
     // don't use the index operator, we want characters not bytes
-    s1.char_range(0, m1, |x| res.push(x));
+    let mut v1 = s1.chars();
+    for _ in 0..m1 {
+        res.push(v1.next().unwrap());
+    }
+    //s1.char_range(0, m1, |x| res.push(x));
 
     // part 2: s1 and s2 overlap
+    let mut v2 = s2.chars();
     for i in 0..l2 {
-        let l = match s1.chars().nth(m1 + i) {
+        let l = match v1.next() {
             Some(v) => v,
             None    => ' ',
         };
-        let r = s2.char_nth(i);
+        let r = v2.next().unwrap();
         if l != ' ' && r != ' ' {
             match charsmush::smush(l, r, hardblank, false, mode) {
                 Some(c) => res.push(c),
@@ -114,7 +112,10 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
     // part 3: remainder of s1 after the end of s2
     // don't use the index operator, we want characters not bytes
     let m2 = m1 + l2;
-    s1.char_range(m2, l1, |x| res.push(x));
+    for _ in m2..l1 {
+        res.push(v1.next().unwrap());
+    }
+    //s1.char_range(m2, l1, |x| res.push(x));
 
     res
 }
