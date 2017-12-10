@@ -30,11 +30,11 @@ impl<'a> Smusher<'a> {
     /// ```
     /// # fn foo() -> Result<(), Box<std::error::Error>> {
     /// // Load a FIGfont
-    /// let mut font = fig::FIGfont::new();
+    /// let mut font = rustlet::FIGfont::new();
     /// font.load("small.flf")?;
     ///
     /// // Create a smusher using the FIGfont
-    /// let mut sm = fig::Smusher::new(&font);
+    /// let mut sm = rustlet::Smusher::new(&font);
     /// # Ok(())
     /// # }
     /// ```

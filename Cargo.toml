@@ -1,15 +1,15 @@
 [package]
-name = "fig"
+name = "rustlet"
 version = "0.1.0"
 authors = ["Claudio Matsuoka <cmatsuoka@gmail.com>"]
 
 [lib]
-name = "fig"
-path = "src/fig/mod.rs"
+name = "rustlet"
+path = "src/lib.rs"
 
 [[bin]]
 name = "rustlet"
-path = "src/main.rs"
+path = "src/bin/rustlet.rs"
 doc = false
 
 [dependencies]

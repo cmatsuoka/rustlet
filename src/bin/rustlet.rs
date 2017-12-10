@@ -1,5 +1,5 @@
 extern crate getopts;
-extern crate fig;
+extern crate rustlet;
 
 use std::env;
 use std::io::{self, BufRead};
@@ -77,13 +77,13 @@ fn find_font(mut fontpath: PathBuf, mut name: String) -> PathBuf {
 }
 
 fn process(path: &Path, msg: &str, matches: &Matches) -> Result<(), Box<Error>> {
-    let mut font = fig::FIGfont::new();
+    let mut font = rustlet::FIGfont::new();
     try!(font.load(path));
 
-    let mut sm = fig::Smusher::new(&font);
+    let mut sm = rustlet::Smusher::new(&font);
 
     if matches.opt_present("k") {
-        sm.mode = fig::SMUSH_KERN;
+        sm.mode = rustlet::SMUSH_KERN;
     } else if matches.opt_present("W") {
         sm.full_width = true;
     }
@@ -93,12 +93,12 @@ fn process(path: &Path, msg: &str, matches: &Matches) -> Result<(), Box<Error>> 
         None    => DEFAULT_WIDTH,
     };
 
-    let mut wr = fig::Wrapper::new(&mut sm, width);
+    let mut wr = rustlet::Wrapper::new(&mut sm, width);
 
     if matches.opt_present("c") {
-        wr.align = fig::Align::Center;
+        wr.align = rustlet::Align::Center;
     } else if matches.opt_present("r") {
-        wr.align = fig::Align::Right;
+        wr.align = rustlet::Align::Right;
     }
 
     if msg.len() > 0 {
@@ -113,7 +113,7 @@ fn process(path: &Path, msg: &str, matches: &Matches) -> Result<(), Box<Error>> 
     Ok(())
 }
 
-fn write_line(wr: &mut fig::Wrapper, s: &str) {
+fn write_line(wr: &mut rustlet::Wrapper, s: &str) {
     wr.clear();
     s.split_whitespace().for_each(|x| wr.wrap_str(x, &print_output));
     print_output(&wr.get());

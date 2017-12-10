@@ -28,12 +28,12 @@ impl<'a> Wrapper<'a> {
     /// ```
     /// # fn foo() -> Result<(), Box<std::error::Error>> {
     /// // Create a smusher using the specified FIGfont
-    /// let mut font = fig::FIGfont::new();
+    /// let mut font = rustlet::FIGfont::new();
     /// font.load("small.flf")?;
-    /// let mut sm = fig::Smusher::new(&font);
+    /// let mut sm = rustlet::Smusher::new(&font);
     ///
     /// // Create a line wrapper using our smusher and maximum width of 80 columns
-    /// let mut wr = fig::Wrapper::new(&mut sm, 80);
+    /// let mut wr = rustlet::Wrapper::new(&mut sm, 80);
     /// # Ok(())
     /// # }
     /// ```
@@ -60,10 +60,10 @@ impl<'a> Wrapper<'a> {
     /// ```
     /// # fn foo() -> Result<(), Box<std::error::Error>> {
     /// // Create a new wrapper
-    /// let mut font = fig::FIGfont::new();
+    /// let mut font = rustlet::FIGfont::new();
     /// font.load("small.flf")?;
-    /// let mut sm = fig::Smusher::new(&font);
-    /// let mut wr = fig::Wrapper::new(&mut sm, 80);
+    /// let mut sm = rustlet::Smusher::new(&font);
+    /// let mut wr = rustlet::Wrapper::new(&mut sm, 80);
     ///
     /// // Add a string to the output buffer
     /// wr.push_str("hello")?;
