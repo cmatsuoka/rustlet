@@ -185,11 +185,11 @@ fn pad(num: usize) -> String {
 }
 
 fn align_center(v: Vec<String>, width: usize) -> Vec<String> {
-    v.iter().map(|x| pad((width - 1) / 2) + x).collect()
+    v.iter().map(|x| pad(width / 2) + x).collect()
 }
 
 fn align_right(v: Vec<String>, width: usize) -> Vec<String> {
-    v.iter().map(|x| pad(width - 1) + x).collect()
+    v.iter().map(|x| pad(width) + x).collect()
 }
 
 #[cfg(test)]
