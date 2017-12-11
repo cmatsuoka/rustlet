@@ -61,33 +61,39 @@ impl<'a> Smusher<'a> {
         res
     }
 
+    /// Verify whether output buffer is empty.
     pub fn is_empty(&self) -> bool {
         self.output.len() == 0 || self.output[0].is_empty()
     }
 
+    /// Clear the output buffer.
     pub fn clear(&mut self) {
         self.output.iter_mut().for_each(|x| x.clear());
     }
 
+    /// Add a string to the output buffer, applying the smushing rules specified in the font
+    /// layout.
     pub fn push_str(&mut self, s: &str) {
         s.chars().for_each(|x| self.push(x));
     }
 
+    /// Add a character to the output buffer, applying the smushing rules specified in the font
+    /// layout.
     pub fn push(&mut self, ch: char) {
         let fc = self.font.get(ch);
         self.output = smush(&self.output, fc, self.font.hardblank, self.full_width, self.mode);
     }
 
+    /// Obtain the size, in sub-characters, of any line of the output buffer.
     pub fn len(&self) -> usize {
         let s: &str = &self.output[0];
         s.char_len()
     }
 
+    /// Limit the size, in sub-characters, of the output buffer. If the buffer is longer than
+    /// the specified size, the rightmost sub-characters will be removed.
     pub fn trim(&mut self, width: usize) {
-        self.output = self.output.iter().map(|line| {
-            let s: &str = &line;
-            s[..s.char_index(width)].to_string()
-        }).collect()
+        self.output = trim(&self.output, width);
     }
 }
 
@@ -97,6 +103,13 @@ fn amount(output: &Vec<String>, c: &FIGchar, hardblank: char, mode: u32) -> usiz
         amt = min(amt, strsmush::amount(&line, &cline, hardblank, mode));
     }
     amt
+}
+
+fn trim(output: &Vec<String>, width: usize) -> Vec<String> {
+    output.iter().map(|line| {
+        let s: &str = &line;
+        s[..s.char_index(width)].to_string()
+    }).collect()
 }
 
 fn smush(output: &Vec<String>, c: &FIGchar, hardblank: char, full_width: bool, mode: u32) -> Vec<String> {
@@ -140,5 +153,32 @@ mod tests {
         let output = vec_of_strings![  "xxxx ", "xxx  ", "xx   ", "x    " ];
         let fc = FIGchar{ lines: vec_of_strings![ "   x", "  xx", " xxx", "xxxx" ] };
         assert_eq!(amount(&output, &fc, '$', 0xbf), 5);
+    }
+
+    #[test]
+    fn test_amount_utf8() {
+        let output = vec_of_strings![ "", "", "", "" ];
+        let fc = FIGchar{ lines: vec_of_strings![ "   ", "  á", " áá", "   " ] };
+        assert_eq!(amount(&output, &fc, '$', 0xbf), 1);
+
+        let output = vec_of_strings![ "ááá ", "áá  ", "á   ", "    " ];
+        let fc = FIGchar{ lines: vec_of_strings![ "   é", "  éé", " ééé", "éééé" ] };
+        assert_eq!(amount(&output, &fc, '$', 0xbf), 4);
+
+        let output = vec_of_strings![  "áááá ", "ááá  ", "áá   ", "á    " ];
+        let fc = FIGchar{ lines: vec_of_strings![ "   á", "  áá", " ááá", "áááá" ] };
+        assert_eq!(amount(&output, &fc, '$', 0xbf), 5);
+    }
+
+    #[test]
+    fn test_trim() {
+        let output = vec_of_strings![ "12345", "abcde" ];
+        assert_eq!(trim(&output, 3), vec_of_strings![ "123", "abc" ]);
+    }
+
+    #[test]
+    fn test_trim_utf8() {
+        let output = vec_of_strings![ "12345", "áéíóú" ];
+        assert_eq!(trim(&output, 3), vec_of_strings![ "123", "áéí" ]);
     }
 }
