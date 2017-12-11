@@ -118,7 +118,7 @@ impl FIGchar {
     }
 
     fn load<R: BufRead>(&mut self, f: &mut R, height: usize) -> Result<&Self, Box<Error>> {
-        let mut line = String::with_capacity(200);
+        let mut line = String::new();
         for _ in 0..height {
             line.clear();
             try!(f.read_line(&mut line));
@@ -142,5 +142,17 @@ impl fmt::Display for FIGchar {
             s += "\n";
         }
         write!(f, "{}", s)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_display() {
+        let mut f = FIGchar::new();
+        f.lines = vec![ "1".to_string(), " 2".to_string(), "  3".to_string() ];
+        assert_eq!(format!("{}", f), "1\n 2\n  3\n");
     }
 }
