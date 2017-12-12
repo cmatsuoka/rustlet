@@ -44,7 +44,7 @@ impl FIGfont {
     pub fn get(&self, ch: char) -> &FIGchar {
         match self.chars.get(&ch) {
             Some(k) => k,
-            None    => self.get(' '),
+            None    => self.get('\0'),
         }
     } 
 
@@ -64,8 +64,11 @@ impl FIGfont {
             try!(f.read_line(&mut line));
         }
 
-        // Load the 95 required characters
-        for i in 32..127{
+        // Define default 0-code character
+        self.chars.insert('\0', FIGchar::with_lines(self.height));
+
+        // Load required characters
+        for i in (32..127).chain(vec![196, 215, 220, 228, 246, 252, 223]) {
             let mut c = FIGchar::new();
             try!(c.load(&mut f, self.height));
             self.chars.insert(char::from_u32(i).unwrap(), c);
@@ -115,6 +118,12 @@ impl FIGchar {
         FIGchar{
             lines: Vec::new(),
         }
+    }
+
+    fn with_lines(num: usize) -> Self {
+        let mut c = Self::new();
+        (0..num).for_each(|_| c.lines.push("".to_string()));
+        c
     }
 
     fn load<R: BufRead>(&mut self, f: &mut R, height: usize) -> Result<&Self, Box<Error>> {
