@@ -1,8 +1,8 @@
-
 use std::char;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
+use std::num;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
@@ -16,7 +16,8 @@ use std::path::Path;
 #[allow(dead_code)] pub const SMUSH_KERN     : u32 = 64;
 #[allow(dead_code)] pub const SMUSH_ENABLE   : u32 = 128;
 
-const ERR_INVALID: &'static str = "invalid font file";
+const ERR_INVALID_FILE   : &'static str = "invalid font file";
+const ERR_INVALID_CODETAG: &'static str = "invalid code tag";
 
 
 #[derive(Debug, Default)]
@@ -53,7 +54,7 @@ impl FIGfont {
         let file = try!(File::open(path));
         let mut f = BufReader::new(&file);
 
-        let mut line = String::with_capacity(200);
+        let mut line = String::new();
 
         try!(f.read_line(&mut line));
         try!(self.parse_header(&line));
@@ -71,11 +72,24 @@ impl FIGfont {
         for i in (32..127).chain(vec![196, 215, 220, 228, 246, 252, 223]) {
             let mut c = FIGchar::new();
             try!(c.load(&mut f, self.height));
-            self.chars.insert(char::from_u32(i).unwrap(), c);
+            self.chars.insert(char_from_u32(i).unwrap(), c);
         }
 
         // Load code-tagged characters
-        // TODO
+        loop {
+            line.clear();
+            if try!(f.read_line(&mut line)) == 0 {
+                break
+            }
+            let code = match line.split_whitespace().next() {
+                Some(val) => val,
+                None      => break,
+            };
+
+            let mut c = FIGchar::new();
+            try!(c.load(&mut f, self.height));
+            self.chars.insert(char_from_u32(u32_from_str(code)?)?, c);
+        }
 
         Ok(self)
     }
@@ -83,13 +97,13 @@ impl FIGfont {
     pub fn parse_header(&mut self, line: &String) -> Result<&Self, Box<Error>> {
 
         if !line.starts_with("flf2") && !line.starts_with("tlf2") {
-            return Err(From::from(ERR_INVALID.to_string()));
+            return Err(From::from(ERR_INVALID_FILE.to_string()));
         }
 
         let parms = line.split_whitespace().collect::<Vec<&str>>();
 
         if parms[0].len() < 6 {
-            return Err(From::from(ERR_INVALID.to_string()));
+            return Err(From::from(ERR_INVALID_FILE.to_string()));
         }
 
         self.version       = parms[0].chars().nth(4).unwrap();
@@ -105,6 +119,30 @@ impl FIGfont {
 
         Ok(self)
     }
+}
+
+fn char_from_u32(num: u32) -> Result<char, Box<Error>> {
+    match char::from_u32(num) {
+        Some(c) => Ok(c),
+        None    => Err(From::from(ERR_INVALID_CODETAG.to_string())),
+    }
+}
+
+// See https://github.com/rust-lang/rfcs/issues/1098
+fn u32_from_str(s: &str) -> Result<u32, num::ParseIntError> {
+    let mut s = s.trim();
+    let mut radix = 10;
+
+    // return an unused character for translation tables
+    if s.starts_with("-") {
+        return Ok(1);
+    }
+
+    if s.starts_with("0x") || s.starts_with("0X") {
+        radix = 16;
+        s = &s[2..];
+    }
+    u32::from_str_radix(s, radix)
 }
 
 
@@ -163,5 +201,23 @@ mod tests {
         let mut f = FIGchar::new();
         f.lines = vec![ "1".to_string(), " 2".to_string(), "  3".to_string() ];
         assert_eq!(format!("{}", f), "1\n 2\n  3\n");
+    }
+
+    #[test]
+    fn test_char_from_u32() {
+        assert_eq!(char_from_u32(0x0041).unwrap(), 'A');
+        assert_eq!(char_from_u32(0x00C1).unwrap(), 'Á');
+    }
+
+    #[test]
+    fn test_u32_from_str() {
+        assert_eq!(u32_from_str("0x0041"), Ok(0x41));
+        assert_eq!(u32_from_str("0x00C1"), Ok(0xC1));
+        assert_eq!(u32_from_str("  0x41"), Ok(0x41));
+        assert_eq!(u32_from_str("0X0041"), Ok(0x41));
+        assert_eq!(u32_from_str("-0x100"), Ok(1));
+        assert_eq!(u32_from_str("-5"), Ok(1));
+        assert!(u32_from_str("foobar").is_err());
+        assert!(u32_from_str("").is_err());
     }
 }
