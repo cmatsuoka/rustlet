@@ -23,6 +23,7 @@ fn main() {
     opts.optflag("k", "kern", "use kerning mode to display characters");
     opts.optflag("l", "left", "left-align the output");
     opts.optopt("m", "mode", "override the font layout mode", "num");
+    opts.optflag("o", "overlap", "use character overlapping mode");
     opts.optflag("r", "right", "right-align the output");
     opts.optflag("S", "smush", "use smushing mode to display characters");
     opts.optflag("W", "full-width", "display characters in full width");
@@ -53,7 +54,7 @@ fn main() {
     }
 
     let msg = matches.free.join(" ");
-    match process(&fontpath, &msg, &matches) {
+    match run(&fontpath, &msg, &matches) {
         Err(e) => { println!("Error: {}", e) }
         Ok(_)  => {},
     }
@@ -76,13 +77,15 @@ fn find_font(mut fontpath: PathBuf, mut name: String) -> PathBuf {
     PathBuf::from(&name)
 }
 
-fn process(path: &Path, msg: &str, matches: &Matches) -> Result<(), Box<Error>> {
+fn run(path: &Path, msg: &str, matches: &Matches) -> Result<(), Box<Error>> {
     let mut font = rustlet::FIGfont::new();
     try!(font.load(path));
 
     let mut sm = rustlet::Smusher::new(&font);
 
-    if matches.opt_present("k") {
+    if matches.opt_present("o") {
+        sm.mode = 0;
+    } else if matches.opt_present("k") {
         sm.mode = rustlet::SMUSH_KERN;
     } else if matches.opt_present("W") {
         sm.full_width = true;

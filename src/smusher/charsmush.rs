@@ -63,7 +63,12 @@ pub fn smush(l: char, r: char, hardblank: char, right2left: bool, mode: u32) -> 
     // FIGcharacter may appear to be "in front".
     if mode == 0 {
         // Ensure overlapping preference to visible characters
-        cmp_return_other!(hardblank, l, r);
+        //cmp_return_other!(hardblank, l, r);
+
+        // Use this instead of the line above to conserve spacing between words.
+        if l == hardblank || r == hardblank {
+            return None
+        }
 
         // Ensures that the dominant (foreground) fig-character for overlapping is
         // the latter in the user's text, not necessarily the rightmost character
