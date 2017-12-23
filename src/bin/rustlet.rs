@@ -3,9 +3,9 @@ extern crate rustlet;
 
 use std::env;
 use std::io::{self, BufRead};
-use std::error::Error;
 use std::path::{self, Path, PathBuf};
 use getopts::{Matches, Options};
+use rustlet::Error;
 
 const FONT_DIR     : &'static str = "/usr/share/figlet";
 const DEFAULT_FONT : &'static str = "standard.flf";
@@ -77,7 +77,7 @@ fn find_font(mut fontpath: PathBuf, mut name: String) -> PathBuf {
     PathBuf::from(&name)
 }
 
-fn run(path: &Path, msg: &str, matches: &Matches) -> Result<(), Box<Error>> {
+fn run(path: &Path, msg: &str, matches: &Matches) -> Result<(), Error> {
     let mut font = rustlet::FIGfont::new();
     try!(font.load(path));
 

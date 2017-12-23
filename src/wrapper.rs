@@ -1,4 +1,4 @@
-use std::error::Error;
+use super::Error;
 use super::Smusher;
 
 pub enum Align {
@@ -101,7 +101,7 @@ impl<'a> Wrapper<'a> {
     ///
     /// If adding the string results in a line wider than the maximum number of columns,
     /// the string is not added to the output buffer and an error is returned.
-    pub fn push_str(&mut self, s: &str) -> Result<(), Box<Error>> {
+    pub fn push_str(&mut self, s: &str) -> Result<(), Error> {
         let empty = self.sm.is_empty();
 
         if !empty {
@@ -113,7 +113,7 @@ impl<'a> Wrapper<'a> {
             let b = self.buffer.clone();
             self.sm.clear();
             self.sm.push_str(&b);
-            return Err(From::from("line full".to_string()))
+            return Err(Error::LineFull)
         }
 
         if !empty {
@@ -129,14 +129,14 @@ impl<'a> Wrapper<'a> {
     ///
     /// If adding the character results in a line wider than the maximum number of columns,
     /// the character is not added to the output buffer and an error is returned.
-    pub fn push(&mut self, ch: char) -> Result<(), Box<Error>> {
+    pub fn push(&mut self, ch: char) -> Result<(), Error> {
         self.sm.push(ch);
 
         if self.sm.len() > self.width {
             let b = self.buffer.clone();
             self.sm.clear();
             self.sm.push_str(&b);
-            return Err(From::from("line full".to_string()))
+            return Err(Error::LineFull)
         }
 
         self.buffer.push(ch);

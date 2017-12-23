@@ -1,11 +1,10 @@
 use std::char;
 use std::collections::HashMap;
-use std::error::Error;
 use std::fmt;
-use std::num;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
+use super::Error;
 
 #[allow(dead_code)] pub const SMUSH_EQUAL    : u32 = 1;
 #[allow(dead_code)] pub const SMUSH_UNDERLINE: u32 = 2;
@@ -15,9 +14,6 @@ use std::path::Path;
 #[allow(dead_code)] pub const SMUSH_HARDBLANK: u32 = 32;
 #[allow(dead_code)] pub const SMUSH_KERN     : u32 = 64;
 #[allow(dead_code)] pub const SMUSH_ENABLE   : u32 = 128;
-
-const ERR_INVALID_FILE   : &'static str = "invalid font file";
-const ERR_INVALID_CODETAG: &'static str = "invalid code tag";
 
 
 #[derive(Debug, Default)]
@@ -49,7 +45,7 @@ impl FIGfont {
         }
     } 
 
-    pub fn load<P: AsRef<Path>>(&mut self, path: P) -> Result<&Self, Box<Error>> {
+    pub fn load<P: AsRef<Path>>(&mut self, path: P) -> Result<&Self, Error> {
 
         let file = try!(File::open(path));
         let mut f = BufReader::new(&file);
@@ -94,16 +90,16 @@ impl FIGfont {
         Ok(self)
     }
 
-    pub fn parse_header(&mut self, line: &String) -> Result<&Self, Box<Error>> {
+    pub fn parse_header(&mut self, line: &String) -> Result<&Self, Error> {
 
         if !line.starts_with("flf2") && !line.starts_with("tlf2") {
-            return Err(From::from(ERR_INVALID_FILE.to_string()));
+            return Err(Error::FontFormat("unsupported font format"));
         }
 
         let parms = line.split_whitespace().collect::<Vec<&str>>();
 
         if parms[0].len() < 6 {
-            return Err(From::from(ERR_INVALID_FILE.to_string()));
+            return Err(Error::FontFormat("unsupported font format"));
         }
 
         self.version       = parms[0].chars().nth(4).unwrap();
@@ -121,15 +117,15 @@ impl FIGfont {
     }
 }
 
-fn char_from_u32(num: u32) -> Result<char, Box<Error>> {
+fn char_from_u32(num: u32) -> Result<char, Error> {
     match char::from_u32(num) {
         Some(c) => Ok(c),
-        None    => Err(From::from(ERR_INVALID_CODETAG.to_string())),
+        None    => Err(Error::CodeTag(num)),
     }
 }
 
 // See https://github.com/rust-lang/rfcs/issues/1098
-fn u32_from_str(s: &str) -> Result<u32, num::ParseIntError> {
+fn u32_from_str(s: &str) -> Result<u32, Error> {
     let mut s = s.trim();
     let mut radix = 10;
 
@@ -142,7 +138,8 @@ fn u32_from_str(s: &str) -> Result<u32, num::ParseIntError> {
         radix = 16;
         s = &s[2..];
     }
-    u32::from_str_radix(s, radix)
+
+    Ok(u32::from_str_radix(s, radix)?)
 }
 
 
@@ -164,14 +161,14 @@ impl FIGchar {
         c
     }
 
-    fn load<R: BufRead>(&mut self, f: &mut R, height: usize) -> Result<&Self, Box<Error>> {
+    fn load<R: BufRead>(&mut self, f: &mut R, height: usize) -> Result<&Self, Error> {
         let mut line = String::new();
         for _ in 0..height {
             line.clear();
             try!(f.read_line(&mut line));
             line = line.trim_right().to_string();
             if line.len() < 1 {
-                return Err(From::from("invalid character length"));
+                return Err(Error::FontFormat("invalid character length"));
             }
             let mark = line.pop().unwrap();
             self.lines.push(line.trim_right_matches(mark).to_string());
@@ -211,12 +208,12 @@ mod tests {
 
     #[test]
     fn test_u32_from_str() {
-        assert_eq!(u32_from_str("0x0041"), Ok(0x41));
-        assert_eq!(u32_from_str("0x00C1"), Ok(0xC1));
-        assert_eq!(u32_from_str("  0x41"), Ok(0x41));
-        assert_eq!(u32_from_str("0X0041"), Ok(0x41));
-        assert_eq!(u32_from_str("-0x100"), Ok(1));
-        assert_eq!(u32_from_str("-5"), Ok(1));
+        assert!(matches!(u32_from_str("0x0041"), Ok(0x41)));
+        assert!(matches!(u32_from_str("0x00C1"), Ok(0xC1)));
+        assert!(matches!(u32_from_str("  0x41"), Ok(0x41)));
+        assert!(matches!(u32_from_str("0X0041"), Ok(0x41)));
+        assert!(matches!(u32_from_str("-0x100"), Ok(1)));
+        assert!(matches!(u32_from_str("-5"), Ok(1)));
         assert!(u32_from_str("foobar").is_err());
         assert!(u32_from_str("").is_err());
     }
