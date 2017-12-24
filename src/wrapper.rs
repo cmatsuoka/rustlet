@@ -100,7 +100,7 @@ impl<'a> Wrapper<'a> {
     /// # Errors
     ///
     /// If adding the string results in a line wider than the maximum number of columns,
-    /// the string is not added to the output buffer and an error is returned.
+    /// the string is not added to the output buffer and a LineFull error is returned.
     pub fn push_str(&mut self, s: &str) -> Result<(), Error> {
         let empty = self.sm.is_empty();
 
@@ -127,7 +127,7 @@ impl<'a> Wrapper<'a> {
     /// # Errors
     ///
     /// If adding the character results in a line wider than the maximum number of columns,
-    /// the character is not added to the output buffer and an error is returned.
+    /// the character is not added to the output buffer and a LineFull error is returned.
     pub fn push(&mut self, ch: char) -> Result<(), Error> {
         self.sm.push(ch);
 
@@ -141,11 +141,12 @@ impl<'a> Wrapper<'a> {
         Ok(())
     }
 
-    pub fn push_nowrap(&mut self, ch: char) {
-        self.sm.push(ch);
-        self.buffer.push(ch);
-    }
-
+    /// Add a string to the output buffer, wrapping it if necessary.
+    ///
+    /// If the new string causes the output to be wider than the maximum width, the current
+    /// buffer contents (if any) will be passed to the flush callback, the buffer will be
+    /// cleared, and the new string will be added to the buffer. If the string is wider
+    /// than the output buffer, it will be wrapped at character level.
     pub fn wrap_str(&mut self, s: &str, flush: &Fn(&Vec<String>)) {
         match self.push_str(s) {
             Ok(_)  => {},
@@ -162,6 +163,12 @@ impl<'a> Wrapper<'a> {
         }
     }
     
+    /// Add a character to the output buffer, wrapping it if necessary.
+    ///
+    /// If the new character causes the output to be wider than the maximum width, the current
+    /// buffer contents (if any) will be passed to the flush callback, the buffer will be
+    /// cleared, and the new character will be added to the buffer. If the character is wider
+    /// than the maximum width, it will be added without any additional processing.
     fn wrap(&mut self, word: &str, flush: &Fn(&Vec<String>)) {
         for c in word.chars() {
             match self.push(c) {
@@ -171,7 +178,9 @@ impl<'a> Wrapper<'a> {
                         flush(&self.get());
                         self.clear();
                     }
-                    self.push_nowrap(c);
+                    // don't wrap this character
+                    self.sm.push(c);
+                    self.buffer.push(c);
                 }
             }
         }
