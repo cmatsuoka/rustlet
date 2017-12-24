@@ -110,9 +110,8 @@ impl<'a> Wrapper<'a> {
         self.sm.push_str(s);
 
         if self.sm.len() > self.width {
-            let b = self.buffer.clone();
             self.sm.clear();
-            self.sm.push_str(&b);
+            self.sm.push_str(&self.buffer);
             return Err(Error::LineFull)
         }
 
@@ -133,9 +132,8 @@ impl<'a> Wrapper<'a> {
         self.sm.push(ch);
 
         if self.sm.len() > self.width {
-            let b = self.buffer.clone();
             self.sm.clear();
-            self.sm.push_str(&b);
+            self.sm.push_str(&self.buffer);
             return Err(Error::LineFull)
         }
 

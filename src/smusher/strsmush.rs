@@ -60,7 +60,7 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
              mode: u32) -> String {
 
     if s2x.is_empty() {
-        return s1.to_string();
+        return s1.to_owned();
     }
 
     let mut s2 = s2x;
@@ -72,7 +72,7 @@ pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: b
     }
 
     let l2 = s2.char_len();
-    let mut res = "".to_string();
+    let mut res = "".to_owned();
     let m1 = l1 - amt;
 
     // part 1: only characters from s1
