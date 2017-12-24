@@ -24,6 +24,7 @@ fn main() {
     opts.optflag("l", "left", "left-align the output");
     opts.optopt("m", "mode", "override the font layout mode", "num");
     opts.optflag("o", "overlap", "use character overlapping mode");
+    opts.optflag("p", "paragraph", "ignore mid-paragraph line breaks");
     opts.optflag("r", "right", "right-align the output");
     opts.optflag("S", "smush", "use smushing mode to display characters");
     opts.optflag("W", "full-width", "display characters in full width");
@@ -110,7 +111,12 @@ fn run(path: &Path, msg: &str, matches: &Matches) -> Result<(), Error> {
     } else {
         // read message from stdin
         let input = io::BufReader::new(io::stdin());
-        input.lines().for_each(|x| write_line(&mut wr, &x.unwrap()));
+        if matches.opt_present("p") {
+            input.lines().for_each(|x| write_paragraph(&mut wr, &x.unwrap()));
+            print_output(&wr.get());
+        } else {
+            input.lines().for_each(|x| write_line(&mut wr, &x.unwrap()));
+        }
     }
 
     Ok(())
@@ -118,8 +124,21 @@ fn run(path: &Path, msg: &str, matches: &Matches) -> Result<(), Error> {
 
 fn write_line(wr: &mut rustlet::Wrapper, s: &str) {
     wr.clear();
-    s.split_whitespace().for_each(|x| wr.wrap_str(x, &print_output));
+    write_words(wr, s);
     print_output(&wr.get());
+}
+
+fn write_paragraph(wr: &mut rustlet::Wrapper, s: &str) {
+    if s.starts_with(char::is_whitespace) {
+        print_output(&wr.get());
+        wr.clear();
+        wr.wrap(" ", &print_output);  // keep one space when line starts with whitespaces
+    }
+    write_words(wr, s);
+}
+
+fn write_words(wr: &mut rustlet::Wrapper, s: &str) {
+    s.split_whitespace().for_each(|x| wr.wrap_str(x, &print_output));
 }
 
 fn print_output(v: &Vec<String>) {

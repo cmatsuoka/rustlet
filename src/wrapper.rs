@@ -169,7 +169,7 @@ impl<'a> Wrapper<'a> {
     /// buffer contents (if any) will be passed to the flush callback, the buffer will be
     /// cleared, and the new character will be added to the buffer. If the character is wider
     /// than the maximum width, it will be added without any additional processing.
-    fn wrap(&mut self, word: &str, flush: &Fn(&Vec<String>)) {
+    pub fn wrap(&mut self, word: &str, flush: &Fn(&Vec<String>)) {
         for c in word.chars() {
             match self.push(c) {
                 Ok(_)  => {},
