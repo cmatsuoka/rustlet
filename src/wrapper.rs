@@ -52,7 +52,6 @@ impl<'a> Wrapper<'a> {
         self.buffer.clear();
     }
 
-
     /// Retrieve the output buffer lines.
     ///
     /// # Examples
@@ -102,7 +101,7 @@ impl<'a> Wrapper<'a> {
     /// If adding the string results in a line wider than the maximum number of columns,
     /// the string is not added to the output buffer and a LineFull error is returned.
     pub fn push_str(&mut self, s: &str) -> Result<(), Error> {
-        let empty = self.sm.is_empty();
+        let empty = self.buffer.trim().is_empty();
 
         if !empty {
             self.sm.push(' ');
