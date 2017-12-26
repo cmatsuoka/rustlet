@@ -6,3 +6,10 @@ A FIGdriver is a program that uses FIGlet FIGfonts to create banners in
 ASCII-art style. Rustlet is a FIGdriver implementation written as a small
 project to learn Rust and exercise string manipulation.
 
+## Differences compared to FIGlet
+
+|                               | FIGlet       | Our FIGdriver        |
+| ---                           | ---          | ---                  |
+| Terminal width                | Set to _n_-1 | Set to _n_           |
+| Non-UTF8 sub-characters       | Display      | Discard FIGcharacter |
+| Add space to end of paragraph | Yes          | No                   |
