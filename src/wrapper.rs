@@ -151,17 +151,13 @@ impl<'a> Wrapper<'a> {
 
         self.has_space = empty;
 
-        match self.push_str(s) {
-            Ok(_)  => {},
-            Err(_) => {
-                if !self.buffer.is_empty() {
-                    flush(&self.get());
-                    self.clear();
-                }
-                match self.push_str(s) {
-                    Ok(_)  => {},
-                    Err(_) => self.wrap(s, flush),
-                }
+        if self.push_str(s).is_err() {
+            if !self.buffer.is_empty() {
+                flush(&self.get());
+                self.clear();
+            }
+            if self.push_str(s).is_err() {
+                self.wrap(s, flush)
             }
         }
     }
@@ -174,17 +170,14 @@ impl<'a> Wrapper<'a> {
     /// than the maximum width, it will be added without any additional processing.
     pub fn wrap(&mut self, word: &str, flush: &Fn(&Vec<String>)) {
         for c in word.chars() {
-            match self.push(c) {
-                Ok(_)  => {},
-                Err(_) => {
-                    if !self.buffer.is_empty() {
-                        flush(&self.get());
-                        self.clear();
-                    }
-                    // don't wrap this character
-                    self.sm.push(c);
-                    self.buffer.push(c);
+            if self.push(c).is_err() {
+                if !self.buffer.is_empty() {
+                    flush(&self.get());
+                    self.clear();
                 }
+                // don't wrap this character
+                self.sm.push(c);
+                self.buffer.push(c);
             }
         }
     }
