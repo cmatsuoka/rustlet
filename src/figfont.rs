@@ -166,9 +166,11 @@ impl FIGchar {
 
     fn load<R: BufRead>(&mut self, f: &mut R, height: usize) -> Result<&Self, Error> {
         let mut line = String::new();
-        for _ in 0..height {
+        for i in 0..height {
             line.clear();
             if f.read_line(&mut line).is_err() {
+                // read rest of lines
+                (i+1..height).for_each(|_| { let _ = f.read_line(&mut line); });
                 // If one line fails to load, clear other lines as well
                 self.lines.clear();
                 (0..height).for_each(|_| self.lines.push("".to_owned()));
