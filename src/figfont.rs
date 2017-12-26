@@ -32,12 +32,15 @@ pub struct FIGfont {
 }
 
 impl FIGfont {
+
+    /// Create a new FIGfont.
     pub fn new() -> Self {
         let mut font: FIGfont = Default::default();
         font.chars = HashMap::new();
         font
     }
 
+    /// Obtain the FIGchar in this font for the given char.
     pub fn get(&self, ch: char) -> &FIGchar {
         match self.chars.get(&ch) {
             Some(k) => k,
@@ -45,8 +48,8 @@ impl FIGfont {
         }
     } 
 
+    /// Load a font from the given .flf or .tlf file.
     pub fn load<P: AsRef<Path>>(&mut self, path: P) -> Result<&Self, Error> {
-
         let file = try!(File::open(path));
         let mut f = BufReader::new(&file);
 
@@ -90,7 +93,7 @@ impl FIGfont {
         Ok(self)
     }
 
-    pub fn parse_header(&mut self, line: &String) -> Result<&Self, Error> {
+    fn parse_header(&mut self, line: &String) -> Result<&Self, Error> {
 
         if !line.starts_with("flf2") && !line.starts_with("tlf2") {
             return Err(Error::FontFormat("unsupported font format"));
