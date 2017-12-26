@@ -17,6 +17,7 @@ pub struct Wrapper<'a> {
     pub buffer: String,
     pub width : usize,
     pub align : Align,
+    has_space : bool,
 }
 
 impl<'a> Wrapper<'a> {
@@ -41,8 +42,9 @@ impl<'a> Wrapper<'a> {
         Wrapper{
            sm,
            width,
-           buffer: String::new(),
-           align : Align::Left,
+           buffer   : String::new(),
+           align    : Align::Left,
+           has_space: true,
         }
     }
 
@@ -50,6 +52,7 @@ impl<'a> Wrapper<'a> {
     pub fn clear(&mut self) {
         self.sm.clear();
         self.buffer.clear();
+        self.has_space = true;
     }
 
     /// Retrieve the output buffer lines.
@@ -101,11 +104,6 @@ impl<'a> Wrapper<'a> {
     /// If adding the string results in a line wider than the maximum number of columns,
     /// the string is not added to the output buffer and a LineFull error is returned.
     pub fn push_str(&mut self, s: &str) -> Result<(), Error> {
-        let empty = self.buffer.trim().is_empty();
-
-        if !empty {
-            self.sm.push(' ');
-        }
         self.sm.push_str(s);
 
         if self.sm.len() > self.width {
@@ -114,9 +112,6 @@ impl<'a> Wrapper<'a> {
             return Err(Error::LineFull)
         }
 
-        if !empty {
-            self.buffer.push(' ');
-        }
         self.buffer.push_str(s);
         Ok(())
     }
@@ -147,6 +142,15 @@ impl<'a> Wrapper<'a> {
     /// cleared, and the new string will be added to the buffer. If the string is wider
     /// than the output buffer, it will be wrapped at character level.
     pub fn wrap_str(&mut self, s: &str, flush: &Fn(&Vec<String>)) {
+
+        let empty = s.trim().is_empty();
+
+        if !self.has_space && !empty {
+            let _ = self.push(' ');
+        }
+
+        self.has_space = empty;
+
         match self.push_str(s) {
             Ok(_)  => {},
             Err(_) => {

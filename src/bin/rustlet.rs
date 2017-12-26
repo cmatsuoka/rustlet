@@ -1,10 +1,12 @@
 extern crate getopts;
 extern crate rustlet;
+extern crate regex;
 
 use std::env;
 use std::io::{self, BufRead};
 use std::path::{self, Path, PathBuf};
 use getopts::{Matches, Options};
+use regex::Regex;
 use rustlet::Error;
 
 const FONT_DIR     : &'static str = "/usr/share/figlet";
@@ -105,40 +107,41 @@ fn run(path: &Path, msg: &str, matches: &Matches) -> Result<(), Error> {
         wr.align = rustlet::Align::Right;
     }
 
+    let re = Regex::new(r"\b").unwrap();
+
     if msg.len() > 0 {
         // read message from command line parameters
-        write_line(&mut wr, &msg)
+        write_line(&mut wr, &msg, &re)
     } else {
         // read message from stdin
         let input = io::BufReader::new(io::stdin());
         if matches.opt_present("p") {
-            input.lines().for_each(|x| write_paragraph(&mut wr, &x.unwrap()));
+            input.lines().for_each(|x| write_paragraph(&mut wr, &x.unwrap(), &re));
             print_output(&wr.get());
         } else {
-            input.lines().for_each(|x| write_line(&mut wr, &x.unwrap()));
+            input.lines().for_each(|x| write_line(&mut wr, &x.unwrap(), &re));
         }
     }
 
     Ok(())
 }
 
-fn write_line(wr: &mut rustlet::Wrapper, s: &str) {
+fn write_line(wr: &mut rustlet::Wrapper, s: &str, re: &Regex) {
     wr.clear();
-    write_words(wr, s);
+    write_tokens(wr, s, re);
     print_output(&wr.get());
 }
 
-fn write_paragraph(wr: &mut rustlet::Wrapper, s: &str) {
+fn write_paragraph(wr: &mut rustlet::Wrapper, s: &str, re: &Regex) {
     if s.starts_with(char::is_whitespace) {
         print_output(&wr.get());
         wr.clear();
-        wr.wrap(" ", &print_output);  // keep one space when line starts with whitespaces
     }
-    write_words(wr, s);
+    write_tokens(wr, s, re);
 }
 
-fn write_words(wr: &mut rustlet::Wrapper, s: &str) {
-    s.split_whitespace().for_each(|x| wr.wrap_str(x, &print_output));
+fn write_tokens(wr: &mut rustlet::Wrapper, s: &str, re: &Regex) {
+    re.split(s).for_each(|x| if !x.is_empty() { wr.wrap_str(x, &print_output) });
 }
 
 fn print_output(v: &Vec<String>) {

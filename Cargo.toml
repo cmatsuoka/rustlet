@@ -15,6 +15,7 @@ doc = false
 [dependencies]
 getopts = "0.2"
 matches = "0.1"
+regex = "0.2"
 
 [profile.release]
 lto = true
