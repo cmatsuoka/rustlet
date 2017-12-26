@@ -160,7 +160,7 @@ impl FIGchar {
 
     fn with_lines(num: usize) -> Self {
         let mut c = Self::new();
-        (0..num).for_each(|_| c.lines.push("".to_string()));
+        (0..num).for_each(|_| c.lines.push("".to_owned()));
         c
     }
 
@@ -168,7 +168,12 @@ impl FIGchar {
         let mut line = String::new();
         for _ in 0..height {
             line.clear();
-            try!(f.read_line(&mut line));
+            if f.read_line(&mut line).is_err() {
+                // If one line fails to load, clear other lines as well
+                self.lines.clear();
+                (0..height).for_each(|_| self.lines.push("".to_owned()));
+                return Ok(self)
+            }
             line = line.trim_right().to_string();
             if line.len() < 1 {
                 return Err(Error::FontFormat("invalid character length"));
