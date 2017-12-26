@@ -41,7 +41,7 @@ impl FIGfont {
     pub fn get(&self, ch: char) -> &FIGchar {
         match self.chars.get(&ch) {
             Some(k) => k,
-            None    => self.get('\0'),
+            None    => self.get( if ch == '\t' { ' ' } else { '\0' }),
         }
     } 
 
