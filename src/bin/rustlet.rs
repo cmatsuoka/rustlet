@@ -11,7 +11,7 @@ use rustlet::Error;
 
 const FONT_DIR     : &'static str = "/usr/share/figlet";
 const DEFAULT_FONT : &'static str = "standard.flf";
-const DEFAULT_WIDTH: usize = 80;
+const DEFAULT_WIDTH: usize = 79;
 
 
 fn main() {
