@@ -97,6 +97,11 @@ impl<'a> Wrapper<'a> {
         self.sm.len()
     }
 
+    /// Verify whether the output buffer is empty.
+    pub fn is_empty(&self) -> bool {
+        self.sm.is_empty()
+    }
+
     /// Add a string to the output buffer.
     ///
     /// # Errors

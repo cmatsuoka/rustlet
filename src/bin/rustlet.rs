@@ -107,7 +107,7 @@ fn run(path: &Path, msg: &str, matches: &Matches) -> Result<(), Error> {
         wr.align = rustlet::Align::Right;
     }
 
-    let re = Regex::new(r"\b").unwrap();
+    let re = Regex::new(r"(\S+|\s+)").unwrap();
 
     if msg.len() > 0 {
         // read message from command line parameters
@@ -133,7 +133,7 @@ fn write_line(wr: &mut rustlet::Wrapper, s: &str, re: &Regex) {
 }
 
 fn write_paragraph(wr: &mut rustlet::Wrapper, s: &str, re: &Regex) {
-    if s.starts_with(char::is_whitespace) {
+    if s.starts_with(char::is_whitespace) && !wr.is_empty() {
         print_output(&wr.get());
         wr.clear();
     }
@@ -141,7 +141,10 @@ fn write_paragraph(wr: &mut rustlet::Wrapper, s: &str, re: &Regex) {
 }
 
 fn write_tokens(wr: &mut rustlet::Wrapper, s: &str, re: &Regex) {
-    re.split(s).for_each(|x| if !x.is_empty() { wr.wrap_str(x, &print_output) });
+    re.captures_iter(s).for_each(|x| match x.get(0) {
+        Some(val) => wr.wrap_str(val.as_str(), &print_output),
+        None      => {},
+    })
 }
 
 fn print_output(v: &Vec<String>) {
