@@ -12,4 +12,5 @@ project to learn Rust and exercise string manipulation.
 | ---                           | ---          | ---                  |
 | Terminal width                | Set to _n_-1 | Set to _n_           |
 | Non-UTF8 sub-characters       | Display      | Discard FIGcharacter |
-| Add space to end of paragraph | Yes          | No                   |
+| End space in paragraph mode   | Add          | Don't add            |
+| Word spacing in overlap mode  | Discard      | Keep                 |
