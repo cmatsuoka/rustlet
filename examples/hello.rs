@@ -9,7 +9,8 @@ fn main() {
 }
 
 fn run() -> Result<Vec<String>, rustlet::Error> {
-    let font = FIGfont::from_file("fonts/standard.flf")?;
+    let path = env!("CARGO_MANIFEST_DIR").to_owned() + "/fonts/standard.flf";
+    let font = FIGfont::from_file(&path)?;
     let mut sm = Smusher::new(&font);
     sm.push_str("Hello world");
     Ok(sm.get())
