@@ -13,7 +13,7 @@ pub enum Align {
 /// FIGcharacters if the output text fits inside the maximum width specified on
 /// creation.
 pub struct Wrapper<'a> {
-    sm        : &'a mut Smusher<'a>,
+    sm        : Smusher<'a>,
     pub buffer: String,
     pub width : usize,
     pub align : Align,
@@ -34,11 +34,11 @@ impl<'a> Wrapper<'a> {
     /// let mut sm = rustlet::Smusher::new(&font);
     ///
     /// // Create a line wrapper using our smusher and maximum width of 80 columns
-    /// let mut wr = rustlet::Wrapper::new(&mut sm, 80);
+    /// let mut wr = rustlet::Wrapper::new(sm, 80);
     /// # Ok(())
     /// # }
     /// ```
-    pub fn new(sm: &'a mut Smusher<'a>, width: usize) -> Self {
+    pub fn new(sm: Smusher<'a>, width: usize) -> Self {
         Wrapper{
            sm,
            width,
@@ -65,7 +65,7 @@ impl<'a> Wrapper<'a> {
     /// let mut font = rustlet::FIGfont::new();
     /// font.load("small.flf")?;
     /// let mut sm = rustlet::Smusher::new(&font);
-    /// let mut wr = rustlet::Wrapper::new(&mut sm, 80);
+    /// let mut wr = rustlet::Wrapper::new(sm, 80);
     ///
     /// // Add a string to the output buffer
     /// wr.push_str("hello")?;

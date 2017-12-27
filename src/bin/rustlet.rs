@@ -99,7 +99,7 @@ fn run(path: &Path, msg: &str, matches: &Matches) -> Result<(), Error> {
         None    => DEFAULT_WIDTH,
     };
 
-    let mut wr = rustlet::Wrapper::new(&mut sm, width);
+    let mut wr = rustlet::Wrapper::new(sm, width);
 
     if matches.opt_present("c") {
         wr.align = rustlet::Align::Center;
