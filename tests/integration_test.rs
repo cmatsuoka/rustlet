@@ -1,15 +1,8 @@
 extern crate rustlet;
 
-use std::env;
-use std::path;
-
 macro_rules! new_smusher {
     ( $a: ident, $b: expr ) => {
-        let mut path = path::PathBuf::new();
-        path.push(env::current_exe().unwrap());
-        (0..4).for_each(|_| {path.pop();});
-        path.push("tests");
-        path.push($b);
+        let path = env!("CARGO_MANIFEST_DIR").to_owned() + "/tests/" + $b;
         let mut font = rustlet::FIGfont::new();
         assert!(!font.load(path).is_err());
         let $a = rustlet::Smusher::new(&font);
