@@ -40,6 +40,13 @@ impl FIGfont {
         font
     }
 
+    /// Create a new FIGfont from the specified path.
+    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
+        let mut font = Self::new();
+        try!(font.load(path));
+        Ok(font)
+    }
+
     /// Obtain the FIGchar in this font for the given char.
     pub fn get(&self, ch: char) -> &FIGchar {
         match self.chars.get(&ch) {

@@ -62,10 +62,8 @@ impl<'a> Wrapper<'a> {
     /// ```
     /// # fn foo() -> Result<(), Box<std::error::Error>> {
     /// // Create a new wrapper
-    /// let mut font = rustlet::FIGfont::new();
-    /// font.load("small.flf")?;
-    /// let mut sm = rustlet::Smusher::new(&font);
-    /// let mut wr = rustlet::Wrapper::new(sm, 80);
+    /// let mut font = rustlet::FIGfont::from_file("small.flf")?;
+    /// let mut wr = rustlet::Wrapper::new(rustlet::Smusher::new(&font), 80);
     ///
     /// // Add a string to the output buffer
     /// wr.push_str("hello")?;
