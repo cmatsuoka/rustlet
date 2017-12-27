@@ -122,7 +122,7 @@ fn smush(output: &Vec<String>, c: &FIGchar, hardblank: char, full_width: bool, m
     let mut res = Vec::new();
 
     for (line, cline) in output.iter().zip(&c.lines) {
-        res.push(strsmush::smush(&line, &cline, amt, hardblank, false, mode));
+        res.push(strsmush::smush(&line, &cline, amt, hardblank, mode));
     }
 
     res

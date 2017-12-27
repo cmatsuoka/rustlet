@@ -56,8 +56,7 @@ pub fn amount(s1: &str, s2: &str, hardblank: char, mode: u32) -> usize {
     }
 }
 
-pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, right2left: bool,
-             mode: u32) -> String {
+pub fn smush(s1: &str, s2x: &str, mut amt: usize, hardblank: char, mode: u32) -> String {
 
     if s2x.is_empty() {
         return s1.to_owned();
@@ -177,17 +176,17 @@ mod tests {
 
     #[test]
     fn test_smush() {
-        assert_eq!(smush("123! ", "xy", 1, '$', false, 0xbf), "123!xy".to_string());
-        assert_eq!(smush("123> ", "<y", 2, '$', false, 0xbf), "123Xy".to_string());
-        assert_eq!(smush("123! ", "   xy", 5, '$', false, 0xbf), "123xy".to_string());
-        assert_eq!(smush("123/ ", "   /y", 5, '$', false, 0xbf), "123/y".to_string());
-        assert_eq!(smush("", "   y", 3, '$', false, 0xbf), "y".to_string());
-        assert_eq!(smush("", "      ", 1, '$', false, 0xbf), "     ".to_string());
+        assert_eq!(smush("123! ", "xy", 1, '$', 0xbf), "123!xy".to_string());
+        assert_eq!(smush("123> ", "<y", 2, '$', 0xbf), "123Xy".to_string());
+        assert_eq!(smush("123! ", "   xy", 5, '$', 0xbf), "123xy".to_string());
+        assert_eq!(smush("123/ ", "   /y", 5, '$', 0xbf), "123/y".to_string());
+        assert_eq!(smush("", "   y", 3, '$', 0xbf), "y".to_string());
+        assert_eq!(smush("", "      ", 1, '$', 0xbf), "     ".to_string());
     }
 
     #[test]
     fn test_smush_utf8() {
-        assert_eq!(smush("áéí! ", "óú", 1, '$', false, 0xbf), "áéí!óú".to_string());
-        assert_eq!(smush("", "   á", 3, '$', false, 0xbf), "á".to_string());
+        assert_eq!(smush("áéí! ", "óú", 1, '$', 0xbf), "áéí!óú".to_string());
+        assert_eq!(smush("", "   á", 3, '$', 0xbf), "á".to_string());
     }
 }
