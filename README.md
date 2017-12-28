@@ -15,3 +15,4 @@ project to learn Rust and exercise string manipulation.
 | Word spacing in overlap mode  | No           | Yes                  |
 | End space in paragraph mode   | Yes          | No                   |
 | Right-to-left support         | Yes          | No                   |
+| Control files                 | Yes          | No                   |
