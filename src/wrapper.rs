@@ -29,8 +29,7 @@ impl<'a> Wrapper<'a> {
     /// ```
     /// # fn foo() -> Result<(), Box<std::error::Error>> {
     /// // Create a smusher using the specified FIGfont
-    /// let mut font = rustlet::FIGfont::new();
-    /// font.load("small.flf")?;
+    /// let font = rustlet::FIGfont::from_path("small.flf")?;
     /// let mut sm = rustlet::Smusher::new(&font);
     ///
     /// // Create a line wrapper using our smusher and maximum width of 80 columns
