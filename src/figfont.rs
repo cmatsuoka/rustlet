@@ -15,7 +15,7 @@ use super::Error;
 #[allow(dead_code)] pub const SMUSH_KERN     : u32 = 64;
 #[allow(dead_code)] pub const SMUSH_ENABLE   : u32 = 128;
 
-
+/// A font of large ASCII or UTF-8 characters.
 #[derive(Debug, Default)]
 pub struct FIGfont {
     version       : char,     // font standard version (currently 'a')
@@ -33,14 +33,13 @@ pub struct FIGfont {
 
 impl FIGfont {
 
-    /// Create a new FIGfont.
-    pub fn new() -> Self {
+    fn new() -> Self {
         let mut font: FIGfont = Default::default();
         font.chars = HashMap::new();
         font
     }
 
-    /// Create a new FIGfont from the specified path.
+    /// Create a new FIGfont from the specified .flf or .tlf file.
     pub fn from_path<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
         let mut font = Self::new();
         try!(font.load(path));
@@ -56,7 +55,7 @@ impl FIGfont {
     } 
 
     /// Load a font from the given .flf or .tlf file.
-    pub fn load<P: AsRef<Path>>(&mut self, path: P) -> Result<&Self, Error> {
+    fn load<P: AsRef<Path>>(&mut self, path: P) -> Result<&Self, Error> {
         let file = try!(File::open(path));
         let mut f = BufReader::new(&file);
 

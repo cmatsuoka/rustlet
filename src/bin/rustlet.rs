@@ -81,9 +81,7 @@ fn find_font(mut fontpath: PathBuf, mut name: String) -> PathBuf {
 }
 
 fn run(path: &Path, msg: &str, matches: &Matches) -> Result<(), Error> {
-    let mut font = rustlet::FIGfont::new();
-    try!(font.load(path));
-
+    let font = try!(rustlet::FIGfont::from_path(path));
     let mut sm = rustlet::Smusher::new(&font);
 
     if matches.opt_present("o") {

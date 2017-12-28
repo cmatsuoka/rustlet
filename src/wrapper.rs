@@ -11,13 +11,14 @@ pub enum Align {
 ///
 /// Wrapper receives string or character input and renders the corresponding
 /// FIGcharacters if the output text fits inside the maximum width specified on
-/// creation.
+/// creation. The wrapper will flush the output buffer earlier if the line is
+/// too long, thus producing multiple “lines” of output text.
 pub struct Wrapper<'a> {
-    sm        : Smusher<'a>,
-    buffer: String,
-    pub width : usize,
-    pub align : Align,
-    has_space : bool,
+    sm        : Smusher<'a>, // the FIGcharacter smusher
+    buffer    : String,      // buffer to keep our input text 
+    has_space : bool,        // whether we should add an extra space
+    pub width : usize,       // terminal width
+    pub align : Align,       // text alignment
 }
 
 impl<'a> Wrapper<'a> {

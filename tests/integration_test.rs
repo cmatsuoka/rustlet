@@ -5,8 +5,7 @@ use std::path;
 macro_rules! new_smusher {
     ( $a: ident, $b: expr ) => {
         let path = env!("CARGO_MANIFEST_DIR").to_owned() + &path::MAIN_SEPARATOR.to_string() + $b;
-        let mut font = rustlet::FIGfont::new();
-        assert!(!font.load(path).is_err());
+        let font = rustlet::FIGfont::from_path(path).unwrap();
         let mut $a = rustlet::Smusher::new(&font);
         $a.mode = font.layout;
     }
