@@ -41,7 +41,7 @@ impl FIGfont {
     }
 
     /// Create a new FIGfont from the specified path.
-    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
+    pub fn from_path<P: AsRef<Path>>(path: P) -> Result<Self, Error> {
         let mut font = Self::new();
         try!(font.load(path));
         Ok(font)

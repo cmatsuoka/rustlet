@@ -23,7 +23,7 @@ fn run() -> Result<(), Box<Error>> {
 }
 
 fn show_font(p: PathBuf, prefix: &str) -> Result<(), Box<Error>> {
-    let font = FIGfont::from_file(p.to_str().unwrap())?;
+    let font = FIGfont::from_path(p.to_str().unwrap())?;
     let name = p.strip_prefix(prefix)?.file_stem().unwrap().to_str().unwrap();
     println!("{}:", name); 
     let mut sm = Smusher::new(&font);
