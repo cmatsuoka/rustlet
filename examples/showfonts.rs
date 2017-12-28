@@ -14,8 +14,10 @@ fn main() {
 
 fn run() -> Result<(), Box<Error>> {
     let path = env!("CARGO_MANIFEST_DIR").to_owned() + "/fonts";
-    for f in fs::read_dir(&path)? {
-        show_font(f?.path(), &path)?;
+    let mut fonts: Vec<_> = fs::read_dir(&path)?.map(|x| x.unwrap().path()).collect();
+    fonts.sort();
+    for f in fonts {
+        show_font(f, &path)?;
     }
     Ok(())
 }
@@ -27,6 +29,6 @@ fn show_font(p: PathBuf, prefix: &str) -> Result<(), Box<Error>> {
     let mut sm = Smusher::new(&font);
     sm.push_str(name);
     sm.get().iter().for_each(|x| println!("{}", x));
-    println!();
+    println!("\n");
     Ok(())
 }
