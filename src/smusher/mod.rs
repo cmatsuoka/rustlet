@@ -1,7 +1,6 @@
 use std::cmp::min;
 pub use super::figfont::{FIGchar, FIGfont};
 pub use super::wrapper::Wrapper;
-pub use super::CharExt;
 
 mod charsmush;
 pub mod strsmush;
@@ -87,7 +86,7 @@ impl<'a> Smusher<'a> {
     /// Obtain the size, in sub-characters, of any line of the output buffer.
     pub fn len(&self) -> usize {
         let s: &str = &self.output[0];
-        s.char_len()
+        s.chars().count()
     }
 
     /// Limit the size, in sub-characters, of the output buffer. If the buffer is longer than
@@ -108,7 +107,8 @@ fn amount(output: &Vec<String>, c: &FIGchar, hardblank: char, mode: u32) -> usiz
 fn trim(output: &Vec<String>, width: usize) -> Vec<String> {
     output.iter().map(|line| {
         let s: &str = &line;
-        s[..s.char_index(width)].to_string()
+        let index = s.char_indices().nth(width).unwrap().0;
+        s[..index].to_string()
     }).collect()
 }
 

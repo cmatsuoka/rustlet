@@ -1,6 +1,6 @@
 use super::charsmush;
 
-pub trait CharExt {
+trait CharExt {
     fn char_len(&self) -> usize;
     fn char_index(&self, usize) -> usize;
 }
