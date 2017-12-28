@@ -144,7 +144,7 @@ fn write_tokens(wr: &mut rustlet::Wrapper, s: &str, re: &Regex) {
     re.captures_iter(s).for_each(|x| match x.get(0) {
         Some(val) => wr.wrap_str(val.as_str(), &print_output),
         None      => {},
-    })
+    });
 }
 
 fn print_output(v: &Vec<String>) {

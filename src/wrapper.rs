@@ -159,18 +159,20 @@ impl<'a> Wrapper<'a> {
                 self.clear();
             }
             if self.push_str(s).is_err() {
-                self.wrap(s, flush)
+                self.wrap_word(s, flush)
             }
+            self.has_space = false;
         }
     }
     
-    /// Add a character to the output buffer, wrapping it if necessary.
+    /// Add a word to the output buffer, breaking it if necessary.
     ///
-    /// If the new character causes the output to be wider than the maximum width, the current
-    /// buffer contents (if any) will be passed to the flush callback, the buffer will be
-    /// cleared, and the new character will be added to the buffer. If the character is wider
-    /// than the maximum width, it will be added without any additional processing.
-    pub fn wrap(&mut self, word: &str, flush: &Fn(&Vec<String>)) {
+    /// Add this word to the output character by character. If a new character causes the
+    /// output to be wider than the maximum width, the current buffer contents (if any) will
+    /// be passed to the flush callback, the buffer will be cleared, and the new character
+    /// will be added to the buffer. If the character is wider than the maximum width, it
+    /// will be added without any additional processing.
+    pub fn wrap_word(&mut self, word: &str, flush: &Fn(&Vec<String>)) {
         for c in word.chars() {
             if self.push(c).is_err() {
                 if !self.buffer.is_empty() {

@@ -67,4 +67,3 @@ impl From<num::ParseIntError> for Error {
         Error::Parse(err)
     }
 }
-
