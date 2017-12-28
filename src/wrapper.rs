@@ -14,7 +14,7 @@ pub enum Align {
 /// creation.
 pub struct Wrapper<'a> {
     sm        : Smusher<'a>,
-    pub buffer: String,
+    buffer: String,
     pub width : usize,
     pub align : Align,
     has_space : bool,
