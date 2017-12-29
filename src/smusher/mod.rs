@@ -97,7 +97,7 @@ impl<'a> Smusher<'a> {
 
 fn amount(output: &Vec<String>, c: &FIGchar, hardblank: char, mode: u32) -> usize {
     let mut amt = 9999;
-    for (line, cline) in output.iter().zip(&c.lines) {
+    for (line, cline) in output.iter().zip(&c.get()) {
         amt = min(amt, strsmush::amount(&line, &cline, hardblank, mode));
     }
     amt
@@ -120,7 +120,7 @@ fn smush(output: &Vec<String>, c: &FIGchar, hardblank: char, full_width: bool, m
 
     let mut res = Vec::new();
 
-    for (line, cline) in output.iter().zip(&c.lines) {
+    for (line, cline) in output.iter().zip(&c.get()) {
         res.push(strsmush::smush(&line, &cline, amt, hardblank, mode));
     }
 
@@ -138,34 +138,34 @@ mod tests {
     #[test]
     fn test_amount() {
         let output = vec_of_strings![ "", "", "", "" ];
-        let fc = FIGchar{ lines: vec_of_strings![ "   ", "  x", " xx", "xx " ] };
+        let fc = FIGchar::from_lines(&vec![ "   ", "  x", " xx", "xx " ]).unwrap();
         assert_eq!(amount(&output, &fc, '$', 0xbf), 0);
 
         let output = vec_of_strings![ "", "", "", "" ];
-        let fc = FIGchar{ lines: vec_of_strings![ "   ", "  x", " xx", "   " ] };
+        let fc = FIGchar::from_lines(&vec![ "   ", "  x", " xx", "   " ]).unwrap();
         assert_eq!(amount(&output, &fc, '$', 0xbf), 1);
 
         let output = vec_of_strings![ "xxx ", "xx  ", "x   ", "    " ];
-        let fc = FIGchar{ lines: vec_of_strings![ "   y", "  yy", " yyy", "yyyy" ] };
+        let fc = FIGchar::from_lines(&vec![ "   y", "  yy", " yyy", "yyyy" ]).unwrap();
         assert_eq!(amount(&output, &fc, '$', 0xbf), 4);
 
         let output = vec_of_strings![  "xxxx ", "xxx  ", "xx   ", "x    " ];
-        let fc = FIGchar{ lines: vec_of_strings![ "   x", "  xx", " xxx", "xxxx" ] };
+        let fc = FIGchar::from_lines(&vec![ "   x", "  xx", " xxx", "xxxx" ]).unwrap();
         assert_eq!(amount(&output, &fc, '$', 0xbf), 5);
     }
 
     #[test]
     fn test_amount_utf8() {
         let output = vec_of_strings![ "", "", "", "" ];
-        let fc = FIGchar{ lines: vec_of_strings![ "   ", "  á", " áá", "   " ] };
+        let fc = FIGchar::from_lines(&vec![ "   ", "  á", " áá", "   " ]).unwrap();
         assert_eq!(amount(&output, &fc, '$', 0xbf), 1);
 
         let output = vec_of_strings![ "ááá ", "áá  ", "á   ", "    " ];
-        let fc = FIGchar{ lines: vec_of_strings![ "   é", "  éé", " ééé", "éééé" ] };
+        let fc = FIGchar::from_lines(&vec![ "   é", "  éé", " ééé", "éééé" ]).unwrap();
         assert_eq!(amount(&output, &fc, '$', 0xbf), 4);
 
         let output = vec_of_strings![  "áááá ", "ááá  ", "áá   ", "á    " ];
-        let fc = FIGchar{ lines: vec_of_strings![ "   á", "  áá", " ááá", "áááá" ] };
+        let fc = FIGchar::from_lines(&vec![ "   á", "  áá", " ááá", "áááá" ]).unwrap();
         assert_eq!(amount(&output, &fc, '$', 0xbf), 5);
     }
 

@@ -154,7 +154,7 @@ fn u32_from_str(s: &str) -> Result<u32, Error> {
 
 #[derive(Debug)]
 pub struct FIGchar {
-    pub lines: Vec<String>,
+    lines: Vec<String>,
 }
 
 impl FIGchar {
@@ -162,6 +162,53 @@ impl FIGchar {
         FIGchar{
             lines: Vec::new(),
         }
+    }
+
+    /// Create a new FIGchar using the given set of lines. All lines must be valid UTF-8 strings
+    /// and have the same length in characters.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn foo() -> Result<(), rustlet::Error> {
+    /// let c = rustlet::FIGchar::from_lines(&vec!["123", "456", "789"])?;
+    /// let output = format!("{}", c);
+    ///
+    /// assert_eq!(output, "123\n456\n789\n".to_string());
+    /// # Ok(())
+    /// # }
+    /// # foo();
+    /// ```
+    pub fn from_lines(lines: &Vec<&str>) -> Result<Self, Error> {
+        let mut c = Self::new();
+        if !lines.is_empty() {
+            let width = lines[0].chars().count();
+            for line in lines {
+                if line.chars().count() != width {
+                    return Err(Error::FontFormat("invalid character width"));
+                }
+                c.lines.push(line.to_string());
+            }
+        }
+        Ok(c)
+    }
+
+    /// Retrieve the lines from this FIGchar.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # fn foo() -> Result<(), rustlet::Error> {
+    /// let c = rustlet::FIGchar::from_lines(&vec!["123", "456", "789"])?;
+    /// let lines = c.get();
+    ///
+    /// assert_eq!(lines, vec!["123".to_string(), "456".to_string(), "789".to_string()]);
+    /// # Ok(())
+    /// # }
+    /// # foo();
+    /// ```
+    pub fn get(&self) -> Vec<String> {
+        self.lines.to_owned()
     }
 
     fn with_lines(num: usize) -> Self {
@@ -184,7 +231,7 @@ impl FIGchar {
             }
             line = line.trim_right().to_string();
             if line.len() < 1 {
-                return Err(Error::FontFormat("invalid character length"));
+                return Err(Error::FontFormat("invalid character width"));
             }
             let mark = line.pop().unwrap();
             self.lines.push(line.trim_right_matches(mark).to_string());
@@ -211,9 +258,8 @@ mod tests {
 
     #[test]
     fn test_display() {
-        let mut f = FIGchar::new();
-        f.lines = vec![ "1".to_string(), " 2".to_string(), "  3".to_string() ];
-        assert_eq!(format!("{}", f), "1\n 2\n  3\n");
+        let f = FIGchar::from_lines(&vec![ "1  ", " 2 ", "  3" ]).unwrap();
+        assert_eq!(format!("{}", f), "1  \n 2 \n  3\n");
     }
 
     #[test]
