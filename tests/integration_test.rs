@@ -35,7 +35,7 @@ fn line_wrap() {
 }
 
 #[test]
-fn alignment_left() {
+fn wrap_align_left() {
     new_smusher!(sm, "tests/test.flf");
     let mut wr = rustlet::Wrapper::new(sm, 12);
     wr.align = rustlet::Align::Left;
@@ -44,7 +44,7 @@ fn alignment_left() {
 }
 
 #[test]
-fn alignment_center() {
+fn wrap_align_center() {
     new_smusher!(sm, "tests/test.flf");
     let mut wr = rustlet::Wrapper::new(sm, 12);
     wr.align = rustlet::Align::Center;
@@ -53,7 +53,7 @@ fn alignment_center() {
 }
 
 #[test]
-fn alignment_right() {
+fn wrap_align_right() {
     new_smusher!(sm, "tests/test.flf");
     let mut wr = rustlet::Wrapper::new(sm, 12);
     wr.align = rustlet::Align::Right;

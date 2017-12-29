@@ -283,4 +283,65 @@ mod tests {
         assert!(u32_from_str("foobar").is_err());
         assert!(u32_from_str("").is_err());
     }
+
+    #[test]
+    fn test_font_load() {
+        let path = env!("CARGO_MANIFEST_DIR").to_owned() + "/fonts/standard.flf";
+        let font = FIGfont::from_path(&path).unwrap();
+
+        let ch = ' ';
+        assert_eq!(font.get(ch).get(), vec![r" $",
+                                            r" $",
+                                            r" $",
+                                            r" $",
+                                            r" $",
+                                            r" $"]);
+
+        let ch = 'A';
+        assert_eq!(font.get(ch).get(), vec![r"     _    ",
+                                            r"    / \   ",
+                                            r"   / _ \  ",
+                                            r"  / ___ \ ",
+                                            r" /_/   \_\",
+                                            r"          "]);
+
+        let ch = char::from_u32(223).unwrap();
+        assert_eq!(font.get(ch).get(), vec![r"   ___ ",
+                                            r"  / _ \",
+                                            r" | |/ /",
+                                            r" | |\ \",
+                                            r" | ||_/",
+                                            r" |_|   "]);
+
+        let ch = char::from_u32(3232).unwrap();
+        assert_eq!(font.get(ch).get(), vec![r"   _____)",
+                                            r"  /_ ___/",
+                                            r"  / _ \  ",
+                                            r" | (_) | ",
+                                            r" $\___/$ ",
+                                            r"         "]);
+    }
+
+    #[test]
+    fn test_get_tab() {
+        let path = env!("CARGO_MANIFEST_DIR").to_owned() + "/fonts/standard.flf";
+        let font = FIGfont::from_path(&path).unwrap();
+
+        let ch = '\t';
+        assert_eq!(font.get(ch).get(), vec![r" $",
+                                            r" $",
+                                            r" $",
+                                            r" $",
+                                            r" $",
+                                            r" $"]);
+    }
+
+    #[test]
+    fn test_char_line_width() {
+        let c = FIGchar::from_lines(&vec!["123", "456", "789"]);
+        assert!(c.is_ok());
+
+        let c = FIGchar::from_lines(&vec!["123", "456", "7890"]);
+        assert!(matches!(c, Err(Error::FontFormat(_))));
+    }
 }
