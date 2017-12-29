@@ -7,9 +7,11 @@ pub mod strsmush;
 
 /// Creates a message written with ASCII-art characters.
 ///
-/// The Smusher adds FIGcharacters to an output buffer and controls how they share
-/// border sub-characters with the content that's already in the buffer. Details
-/// of how exactly this smushing happens is given by its layout mode.
+/// The Smusher adds FIGcharacters to an output buffer and controls how they fit
+/// together in a line. Details of how exactly this fitting happens is given by
+/// the FIGfont layout mode. Possible layout modes include full-width, kerning (when
+/// FIGcharacters are moved closer to each other but without overlapping borders),
+/// or smushing (where borders overlap).
 #[derive(Debug)]
 pub struct Smusher<'a> {
     pub mode      : u32,          // the layout mode

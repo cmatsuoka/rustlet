@@ -15,7 +15,11 @@ use super::Error;
 #[allow(dead_code)] pub const SMUSH_KERN     : u32 = 64;
 #[allow(dead_code)] pub const SMUSH_ENABLE   : u32 = 128;
 
-/// A font of large ASCII or UTF-8 characters.
+/// A font made of large ASCII-art characters.
+///
+/// FIGfont defines a set of large ASCII-art (or UTF-8 Unicode art) characters,
+/// called FIGcharacters, and a layout mode to control how FIGcharacters can be
+/// fit together in a line.
 #[derive(Debug, Default)]
 pub struct FIGfont {
     version       : char,     // font standard version (currently 'a')
