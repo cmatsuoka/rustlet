@@ -126,3 +126,16 @@ fn full_width() {
                               r"                                                        "]);
 }
 
+#[test]
+fn utf8_input() {
+    new_smusher!(sm, "fonts/standard.flf");
+    let mut wr = rustlet::Wrapper::new(sm, 60);
+    assert!(!wr.push_str("Ação! ಠ_ಠ").is_err());
+    assert_eq!(wr.get(), vec![r"    _        /\/|       _    _____)      _____)",
+                              r"   / \   ___|/\/_  ___ | |  /_ ___/     /_ ___/",
+                              r"  / _ \ / __/ _` |/ _ \| |  / _ \       / _ \  ",
+                              r" / ___ \ (_| (_| | (_) |_| | (_) |     | (_) | ",
+                              r"/_/   \_\___\__,_|\___/(_)  \___/ _____ \___/  ",
+                              r"         )_)                     |_____|       "]);
+}
+
