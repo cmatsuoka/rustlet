@@ -10,6 +10,9 @@ fn main() {
     }
 }
 
+// This example reads a text input from stdin and renders the text using the
+// small FIGfont, wrapping lines if necessary.
+
 fn run() -> Result<(), rustlet::Error> {
     let path = env!("CARGO_MANIFEST_DIR").to_owned() + "/fonts/small.flf";
     let font = FIGfont::from_path(&path)?;

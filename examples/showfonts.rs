@@ -12,6 +12,9 @@ fn main() {
     }
 }
 
+// This example lists all FIGfonts in the fonts directory, like showfigfonts(6) utility
+// distributed with FIGlet.
+
 fn run() -> Result<(), Box<Error>> {
     let path = env!("CARGO_MANIFEST_DIR").to_owned() + "/fonts";
     let mut fonts: Vec<_> = fs::read_dir(&path)?.map(|x| x.unwrap().path()).collect();
