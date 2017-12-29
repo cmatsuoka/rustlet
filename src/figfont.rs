@@ -19,7 +19,9 @@ use super::Error;
 ///
 /// FIGfont defines a set of large ASCII-art (or UTF-8 Unicode art) characters,
 /// called FIGcharacters, and a layout mode to control how FIGcharacters can be
-/// fit together in a line.
+/// fit together in a line. All FIGcharacters in a font must have the same number
+/// of lines, and all lines in a FIGcharacter must have the same number of
+/// characters.
 #[derive(Debug, Default)]
 pub struct FIGfont {
     version       : char,     // font standard version (currently 'a')
