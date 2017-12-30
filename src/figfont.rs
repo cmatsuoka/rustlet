@@ -6,14 +6,14 @@ use std::io::{BufRead, BufReader};
 use std::path::Path;
 use super::Error;
 
-#[allow(dead_code)] pub const SMUSH_EQUAL    : u32 = 1;
-#[allow(dead_code)] pub const SMUSH_UNDERLINE: u32 = 2;
-#[allow(dead_code)] pub const SMUSH_HIERARCHY: u32 = 4;
-#[allow(dead_code)] pub const SMUSH_PAIR     : u32 = 8;
-#[allow(dead_code)] pub const SMUSH_BIGX     : u32 = 16;
-#[allow(dead_code)] pub const SMUSH_HARDBLANK: u32 = 32;
-#[allow(dead_code)] pub const SMUSH_KERN     : u32 = 64;
-#[allow(dead_code)] pub const SMUSH_ENABLE   : u32 = 128;
+pub const SMUSH_EQUAL    : u32 = 1;
+pub const SMUSH_UNDERLINE: u32 = 2;
+pub const SMUSH_HIERARCHY: u32 = 4;
+pub const SMUSH_PAIR     : u32 = 8;
+pub const SMUSH_BIGX     : u32 = 16;
+pub const SMUSH_HARDBLANK: u32 = 32;
+pub const SMUSH_KERN     : u32 = 64;
+pub const SMUSH_ENABLE   : u32 = 128;
 
 /// A font made of large ASCII-art characters.
 ///
