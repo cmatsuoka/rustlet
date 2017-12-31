@@ -4,7 +4,7 @@ use std::fmt;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
-use super::Error;
+use Error;
 
 pub const SMUSH_EQUAL    : u32 = 1;
 pub const SMUSH_UNDERLINE: u32 = 2;

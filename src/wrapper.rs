@@ -1,5 +1,5 @@
-use super::Error;
-use super::Smusher;
+use Error;
+use Smusher;
 
 pub enum Align {
     Left,

@@ -1,4 +1,4 @@
-use super::charsmush;
+use smusher::charsmush;
 
 trait CharExt {
     fn char_len(&self) -> usize;

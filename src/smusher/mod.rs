@@ -1,6 +1,6 @@
 use std::cmp::min;
-pub use super::figfont::{FIGchar, FIGfont};
-pub use super::wrapper::Wrapper;
+pub use figfont::{FIGchar, FIGfont};
+pub use wrapper::Wrapper;
 
 mod charsmush;
 pub mod strsmush;
